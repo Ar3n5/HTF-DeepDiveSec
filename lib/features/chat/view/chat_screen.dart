@@ -4,8 +4,10 @@ import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/l10n/app_localizations.dart';
 import 'package:hack_the_future_starter/core/theme_provider.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
+import 'package:hack_the_future_starter/features/chat/widgets/ocean_background.dart';
 
 import '../models/chat_message.dart';
+import '../models/agent_log.dart';
 import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -64,15 +66,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.waves, size: 28),
-            const SizedBox(width: 12),
-            Text(l10n.appBarTitle),
-          ],
-        ),
+    return OceanBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Row(
+            children: [
+              const Icon(Icons.waves, color: Colors.cyan, size: 28),
+              const SizedBox(width: 12),
+              Text(l10n.appBarTitle),
+            ],
+          ),
         actions: [
           IconButton(
             icon: const Icon(Icons.dashboard),
@@ -323,6 +329,7 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         ),
       ),
+    ),
     );
   }
 
@@ -455,13 +462,26 @@ class _MessageView extends StatelessWidget {
       );
     }
 
-    // GenUI surface - full width
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: GenUiSurface(host: host, surfaceId: surfaceId),
-      ),
+    // GenUI surface - full width with fade-in animation
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.scale(
+            scale: 0.95 + (value * 0.05),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: GenUiSurface(host: host, surfaceId: surfaceId),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
