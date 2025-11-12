@@ -10,8 +10,9 @@ class ApiKeys {
   // Replace with your Gemini API key from https://aistudio.google.com/app/apikey
   static const String geminiApiKey = 'YOUR_GEMINI_API_KEY_HERE';
   
-  // Set to true to use direct Gemini API instead of Firebase Vertex AI
-  // For now, using Firebase Vertex AI (already configured)
+  // Set to true to use direct Gemini API (Google AI Studio)
+  // Set to false to use Firebase AI (Gemini via Firebase - RECOMMENDED)
+  // Note: Firebase AI Logic uses Gemini API under the hood
   static const bool useDirectGeminiApi = false;
 }
 
