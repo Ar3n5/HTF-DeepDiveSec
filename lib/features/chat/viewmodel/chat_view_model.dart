@@ -86,7 +86,7 @@ class ChatViewModel extends ChangeNotifier {
           _ignoreNextResponse = false; // Reset flag
           return;
         }
-        
+
         final errorMsg = err.error.toString();
         addLog(AgentLogType.error, 'Error: $errorMsg');
 
@@ -158,6 +158,12 @@ class ChatViewModel extends ChangeNotifier {
   /// Show placeholder visualization when API is rate limited
   void _showPlaceholderVisualization() {
     final lowerQuery = _lastUserQuery.toLowerCase();
+
+    // Check if we already showed rate limit message (prevent duplicates)
+    final lastMessage = _messages.isNotEmpty ? _messages.last.text : null;
+    if (lastMessage != null && lastMessage.contains('API RATE LIMITED')) {
+      return; // Don't show duplicate
+    }
 
     // Add warning message
     _messages.add(
