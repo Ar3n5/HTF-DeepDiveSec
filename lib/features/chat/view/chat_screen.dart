@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/l10n/app_localizations.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
 
 import '../models/chat_message.dart';
 import '../viewmodel/chat_view_model.dart';
@@ -56,8 +57,25 @@ class _ChatScreenState extends State<ChatScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.appBarTitle),
+        title: Row(
+          children: [
+            const Icon(Icons.waves, size: 28),
+            const SizedBox(width: 12),
+            Text(l10n.appBarTitle),
+          ],
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.dashboard),
+            tooltip: 'View Components',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const OceanComponentsDemo(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(_viewModel.showAgentLog
                 ? Icons.visibility_off

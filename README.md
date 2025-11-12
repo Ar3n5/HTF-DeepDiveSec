@@ -85,4 +85,77 @@ flutter run
 - Gebruik de core catalog voor snelle iteratie; breid later uit.
 - Zet logging op `Level.ALL` tijdens ontwikkeling.
 
+# HTF-DeepDiveSec - Agentic Ocean Explorer
+
+🌊 **An intelligent ocean exploration app with AI-powered visualizations**
+
+## ✨ Features
+
+- 🤖 **Agentic AI**: 5-phase agent loop (Perceive → Plan → Act → Reflect → Present)
+- 📊 **Custom Visualizations**: Line charts, bar charts, gauges, maps
+- 🎨 **Beautiful UI**: Material Design 3 with custom ocean-themed components
+- 🔍 **Transparent Logging**: See exactly what the agent is thinking
+- 🌐 **Multilingual**: English and Dutch support
+- 📱 **Responsive**: Works on web, mobile, and desktop
+
+## 🎯 Quick Start
+
+```bash
+# Install dependencies
+flutter pub get
+
+# Run the app
+flutter run
+```
+
+## 📊 Custom Ocean Components
+
+This app includes specialized visualization components:
+
+- **Line Charts**: Time series trends (temperature, salinity over time)
+- **Bar Charts**: Compare measurements across regions
+- **Gauges**: Visual meters for current values
+- **Map Views**: Geographic locations with measurements
+- **Stats Cards**: Beautiful cards showing min/max/avg statistics
+- **Location Cards**: Ranked location lists with coordinates
+
+**View Components**: Click the dashboard icon (📊) in the app bar to see all components in action!
+
+## 🧠 How It Works
+
+The agent uses a structured workflow for every question:
+
+1. **👁️ Perceive**: Understands your ocean query
+2. **🧠 Plan**: Decides how to visualize the data
+3. **⚡ Act**: Fetches ocean data (currently mock data)
+4. **🤔 Reflect**: Analyzes trends and insights
+5. **🎨 Present**: Creates beautiful visualizations
+
+## 💬 Example Queries
+
+```
+"What is the ocean temperature in the North Sea?"
+```
+
+```
+"Show me salinity trends in the Atlantic Ocean"
+```
+
+```
+"Where were the highest waves measured?"
+```
+
+```
+"Compare ocean temperatures across different regions"
+```
+
+## 🎓 Assignment Compliance
+
+✅ **GenUI Implementation**: Custom component catalog (charts, maps, text)  
+✅ **LLM Integration**: Gemini chooses components via JSON  
+✅ **No Code Generation**: Only JSON schemas, no Dart code generation  
+✅ **Agent Loop**: Full Perceive → Plan → Act → Reflect → Present workflow  
+✅ **Transparency**: Run-log shows all agent actions  
+✅ **Mock Data**: Fallback system for offline development
+
 # HTF-DeepDiveSec
