@@ -27,6 +27,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _viewModel = ChatViewModel()..init();
+    
+    // Auto-scroll when messages change
+    _viewModel.addListener(() {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -207,30 +212,35 @@ class _ChatScreenState extends State<ChatScreen> {
                   valueListenable: _viewModel.isProcessing,
                   builder: (_, isProcessing, __) {
                     if (!isProcessing) return const SizedBox.shrink();
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
                     return Container(
-                      padding: const EdgeInsets.all(8.0),
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2D2D2D)
-                          : Colors.blue[50],
+                      padding: const EdgeInsets.all(12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.cyan,
+                            ),
                           ),
                           const SizedBox(width: 12),
-                          const Text('Agent processing...',
-                              style: TextStyle(fontSize: 12)),
+                          Text(
+                            'Agent processing...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.cyan[200] : Colors.blue[800],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             '(May take 10-20 seconds)',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.grey[400]
-                                  : Colors.grey,
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -240,6 +250,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             onPressed: _viewModel.abort,
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.red,
+                              backgroundColor: Colors.red.withOpacity(0.1),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
                             ),
                           ),
                         ],
@@ -251,6 +266,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
                         child: KeyboardListener(
@@ -288,37 +304,34 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 300),
-                          builder: (context, value, child) {
-                            return Transform.scale(
-                              scale: value,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).brightness == Brightness.dark
-                                      ? const Color(0xFF1565C0)
-                                      : Theme.of(context).primaryColor,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.blue.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.send),
-                                  onPressed: _send,
-                                  color: Colors.white,
-                                ),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(milliseconds: 300),
+                        builder: (context, value, child) {
+                          return Transform.scale(
+                            scale: value,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFF1565C0)
+                                    : Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                              child: IconButton(
+                                icon: const Icon(Icons.send),
+                                onPressed: _send,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
