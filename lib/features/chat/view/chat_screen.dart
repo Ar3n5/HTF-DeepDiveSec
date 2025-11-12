@@ -283,10 +283,18 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: _send,
-                        color: Theme.of(context).primaryColor,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF1565C0)
+                              : Theme.of(context).primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.send),
+                          onPressed: _send,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -359,15 +367,29 @@ class _MessageView extends StatelessWidget {
         );
       }
       
+      // AI text responses - styled like message bubbles
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Align(
         alignment: Alignment.centerLeft,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: model.isError 
+                ? (isDark ? Colors.red[900]!.withOpacity(0.3) : Colors.red[50])
+                : (isDark ? const Color(0xFF2D2D2D) : Colors.grey[100]),
+            borderRadius: BorderRadius.circular(18),
+            border: model.isError
+                ? Border.all(color: Colors.red, width: 1)
+                : null,
+          ),
           child: Text(
-            '$label: $content',
+            content,
             style: TextStyle(
               fontSize: 14,
-              color: model.isError ? Colors.red : Colors.grey[700],
+              color: model.isError 
+                  ? Colors.red[300]
+                  : (isDark ? Colors.white : Colors.grey[800]),
             ),
           ),
         ),

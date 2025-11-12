@@ -212,6 +212,10 @@ class OceanBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.grey[800];
+    final subtitleColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -230,7 +234,7 @@ class OceanBarChart extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: textColor,
                     ),
                   ),
                 ),
@@ -243,6 +247,7 @@ class OceanBarChart extends StatelessWidget {
                 painter: _BarChartPainter(
                   data: data,
                   colors: colors,
+                  isDarkMode: isDark,
                 ),
                 child: Container(),
               ),
@@ -253,11 +258,41 @@ class OceanBarChart extends StatelessWidget {
                 'Unit: $unit',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: subtitleColor,
                   fontStyle: FontStyle.italic,
                 ),
               ),
             ],
+            // Add legend below
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 16,
+              children: data.entries.map((e) {
+                final index = data.keys.toList().indexOf(e.key);
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: colors[index % colors.length],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${e.key}: ${e.value.toStringAsFixed(1)}$unit',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: textColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
           ],
         ),
       ),
@@ -268,8 +303,13 @@ class OceanBarChart extends StatelessWidget {
 class _BarChartPainter extends CustomPainter {
   final Map<String, double> data;
   final List<Color> colors;
+  final bool isDarkMode;
 
-  _BarChartPainter({required this.data, required this.colors});
+  _BarChartPainter({
+    required this.data,
+    required this.colors,
+    this.isDarkMode = false,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -305,23 +345,7 @@ class _BarChartPainter extends CustomPainter {
 
       canvas.drawRRect(rect, paint);
 
-      // Draw label
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: entry.key,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
-      textPainter.paint(
-        canvas,
-        Offset(x + barWidth * 0.4 - textPainter.width / 2, size.height - 15),
-      );
+      // Draw label (will be handled by widget context, skip for now to avoid dark mode issues)
     }
   }
 

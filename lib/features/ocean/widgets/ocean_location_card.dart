@@ -92,12 +92,22 @@ class OceanLocationCard extends StatelessWidget {
                       spacing: 8,
                       runSpacing: 4,
                       children: measurements!.entries.map((e) {
+                        final isDark = Theme.of(context).brightness == Brightness.dark;
                         return Chip(
                           label: Text(
                             '${e.key}: ${e.value}',
-                            style: const TextStyle(fontSize: 11),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
                           ),
-                          backgroundColor: Colors.blue[50],
+                          backgroundColor: isDark
+                              ? const Color(0xFF0D47A1).withOpacity(0.5)
+                              : Colors.blue[50],
+                          side: isDark
+                              ? const BorderSide(color: Color(0xFF1565C0), width: 1)
+                              : null,
                           padding: EdgeInsets.zero,
                           labelPadding: const EdgeInsets.symmetric(
                             horizontal: 8,

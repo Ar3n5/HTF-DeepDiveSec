@@ -5,6 +5,7 @@ import 'ocean_stats_card.dart';
 import 'ocean_chart_widget.dart';
 import 'ocean_gauge_widget.dart';
 import 'ocean_map_widget.dart';
+import 'ocean_interactive_map.dart';
 import 'ocean_location_card.dart';
 
 /// Custom ocean visualization widgets for the GenUI catalog
@@ -17,6 +18,7 @@ class OceanCatalogItems {
       oceanLineChart,
       oceanGauge,
       oceanMap,
+      oceanInteractiveMap,
       oceanLocationCard,
     ]);
   }
