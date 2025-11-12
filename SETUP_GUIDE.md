@@ -1,4 +1,4 @@
-# Agentic Ocean Explorer - Setup & Usage Guide
+# Nautilus AI - Setup & Usage Guide
 
 ## 🌊 What You've Built
 

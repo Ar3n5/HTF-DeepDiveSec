@@ -1,4 +1,4 @@
-## Agentic Ocean Explorer – Barebones GenUI + Firebase AI Starter
+## Nautilus AI – Intelligent Ocean Data Assistant
 
 Deze handleiding is toegespitst op dit starterproject. Een aantal stappen zijn al voor je gedaan, zodat je snel verder kunt.
 
