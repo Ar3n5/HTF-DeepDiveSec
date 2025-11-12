@@ -7,6 +7,7 @@ import 'ocean_gauge_widget.dart';
 import 'ocean_map_widget.dart';
 import 'ocean_interactive_map.dart';
 import 'ocean_location_card.dart';
+import 'ocean_heatmap_widget.dart';
 
 /// Custom ocean visualization widgets for the GenUI catalog
 class OceanCatalogItems {
@@ -20,6 +21,7 @@ class OceanCatalogItems {
       oceanMap,
       oceanInteractiveMap,
       oceanLocationCard,
+      oceanHeatmap,
     ]);
   }
 
@@ -217,6 +219,37 @@ class OceanCatalogItems {
         longitude: (data['longitude'] as num).toDouble(),
         rank: data['rank'] as int? ?? 0,
         measurements: data['measurements'] as Map<String, dynamic>?,
+      );
+    },
+  );
+
+  /// OceanHeatmap - Heatmap visualization for regional temperature/salinity
+  static final oceanHeatmap = CatalogItem(
+    name: 'OceanHeatmap',
+    dataSchema: s.S.object(
+      properties: {
+        'title': s.S.string(description: 'Heatmap title'),
+        'unit': s.S.string(description: 'Unit of measurement'),
+        'data': s.S.list(
+          description: 'Array of region data points',
+          items: s.S.object(
+            properties: {
+              'region': s.S.string(description: 'Region name'),
+              'value': s.S.number(description: 'Measurement value'),
+            },
+            required: ['region', 'value'],
+          ),
+        ),
+      },
+      required: ['title', 'data'],
+    ),
+    widgetBuilder: (itemContext) {
+      final data = itemContext.data as JsonMap;
+      final dataPoints = (data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      return OceanHeatmap(
+        title: data['title'] as String,
+        data: dataPoints,
+        unit: data['unit'] as String? ?? '',
       );
     },
   );
