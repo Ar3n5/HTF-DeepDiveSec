@@ -127,73 +127,17 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   void abort() {
-    addLog(AgentLogType.info, 'User requested abort - recreating conversation');
-
-    // Dispose the current conversation and create a new one
-    // This will stop the LLM from processing
-    try {
-      _conversation.dispose();
-
-      // Recreate the conversation
-      final generator = _service.createContentGenerator(catalog: _catalog);
-      _conversation = GenUiConversation(
-        genUiManager: _manager,
-        contentGenerator: generator,
-        onSurfaceAdded: (s) {
-          addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
-          _messages.add(ChatMessageModel(surfaceId: s.surfaceId));
-          notifyListeners();
-          Future.delayed(const Duration(milliseconds: 100), notifyListeners);
-        },
-        onTextResponse: (text) {
-          addLog(AgentLogType.present, 'Text response generated');
-          _messages.add(ChatMessageModel(text: text));
-          notifyListeners();
-          Future.delayed(const Duration(milliseconds: 100), notifyListeners);
-        },
-        onError: (err) {
-          final errorMsg = err.error.toString();
-          addLog(AgentLogType.error, 'Error: $errorMsg');
-
-          // Check if rate limited - show helpful message
-          if (errorMsg.contains('overload') ||
-              errorMsg.contains('rate limit') ||
-              errorMsg.contains('quota') ||
-              errorMsg.contains('429')) {
-            addLog(
-              AgentLogType.info,
-              'API rate limited - suggesting dashboard',
-            );
-            _messages.add(
-              ChatMessageModel(
-                text:
-                    '⚠️ API RATE LIMITED\n\n'
-                    'The Gemini API is currently overloaded. Please:\n\n'
-                    '1️⃣ Wait 60 seconds before trying again\n'
-                    '2️⃣ Click the 📊 dashboard button (top right) to see all ocean visualizations with placeholder data\n\n'
-                    'Your question was: "$_lastUserQuery"\n\n'
-                    'The dashboard shows examples of all components: temperature gauges, wave charts, '
-                    'interactive maps, and more!',
-              ),
-            );
-          } else {
-            _messages.add(
-              ChatMessageModel(text: 'Error: $errorMsg', isError: true),
-            );
-          }
-          notifyListeners();
-        },
-      );
-
-      _messages.add(
-        ChatMessageModel(
-          text: '🛑 Request aborted. You can ask a new question now.',
-        ),
-      );
-      notifyListeners();
-    } catch (e) {
-      addLog(AgentLogType.error, 'Failed to abort: $e');
-    }
+    addLog(AgentLogType.info, 'User requested abort');
+    
+    // Set flag to ignore any pending responses
+    _ignoreNextResponse = true;
+    
+    // Add message to chat
+    _messages.add(ChatMessageModel(
+      text: '🛑 Request aborted. Any pending results will be ignored.\n'
+            'You can ask a new question now.',
+    ));
+    notifyListeners();
   }
 
   void disposeConversation() {
