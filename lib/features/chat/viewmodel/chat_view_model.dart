@@ -27,6 +27,7 @@ class ChatViewModel extends ChangeNotifier {
   final List<AgentLogEntry> _agentLogs = [];
   bool _showAgentLog = false;
   String _lastUserQuery = '';
+  bool _ignoreNextResponse = false;
 
   List<ChatMessageModel> get messages => List.unmodifiable(_messages);
   List<AgentLogEntry> get agentLogs => List.unmodifiable(_agentLogs);
@@ -56,6 +57,10 @@ class ChatViewModel extends ChangeNotifier {
       genUiManager: _manager,
       contentGenerator: generator,
       onSurfaceAdded: (s) {
+        if (_ignoreNextResponse) {
+          addLog(AgentLogType.info, 'Ignoring surface due to abort');
+          return;
+        }
         addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
         _messages.add(ChatMessageModel(surfaceId: s.surfaceId));
         notifyListeners();
@@ -63,6 +68,11 @@ class ChatViewModel extends ChangeNotifier {
         Future.delayed(const Duration(milliseconds: 100), notifyListeners);
       },
       onTextResponse: (text) {
+        if (_ignoreNextResponse) {
+          addLog(AgentLogType.info, 'Ignoring text response due to abort');
+          _ignoreNextResponse = false; // Reset flag after ignoring
+          return;
+        }
         addLog(AgentLogType.present, 'Text response generated');
         _messages.add(ChatMessageModel(text: text));
         notifyListeners();
