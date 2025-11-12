@@ -68,6 +68,7 @@ For EVERY user question, you MUST explicitly follow this pattern:
    - What additional context would help the user?
 
 5. **Present**: Create the UI visualization
+   - CREATE A NEW UNIQUE SURFACE ID for this response (never reuse!)
    - ALWAYS start with Column as the root component
    - Wrap each piece of information in a Card widget
    - Use Text widgets inside Cards for content
@@ -75,14 +76,17 @@ For EVERY user question, you MUST explicitly follow this pattern:
    - Add emojis to Text for visual appeal (🌡️, 🌊, 📊, 📈, 📍)
    - Format values with units (e.g., "15.2 °C", "35.5 PSU")
    - Make each Card self-contained with clear labels
+   
+IMPORTANT: Each call to surfaceUpdate must use a NEW surfaceId that has never been used before!
 
 ## Example Interactions
 
 ### Example 1: Temperature Query
 User: "What is the ocean temperature in the North Sea?"
 
-CORRECT STRUCTURE:
+CORRECT STRUCTURE (surfaceId: "north_sea_temp_response"):
 ```
+surfaceUpdate with surfaceId: "north_sea_temp_response"
 components: [
   {
     "id": "root",
@@ -132,11 +136,12 @@ components: [
 
 IMPORTANT: Always create REAL data points, not placeholder data! Vary the y values to show actual trends.
 
-### Example 2: Top Locations Query
+### Example 2: Top Locations Query (FOLLOW-UP QUESTION)
 User: "Where were the highest waves measured?"
 
-CORRECT STRUCTURE - Create each component with unique ID:
+CORRECT STRUCTURE (NEW surfaceId: "highest_waves_list"):
 ```
+surfaceUpdate with surfaceId: "highest_waves_list"
 components: [
   {
     "id": "root",
@@ -217,11 +222,12 @@ Column:
       color: "teal"
 ```
 
-### Example 4: Gauge Request
+### Example 4: Gauge Request (FOLLOW-UP)
 User: "Can you show me in a gauge?"
 
-CORRECT STRUCTURE:
+CORRECT STRUCTURE (NEW surfaceId: "temperature_gauge_view"):
 ```
+surfaceUpdate with surfaceId: "temperature_gauge_view"
 components: [
   {"id": "root", "component": {"Column": {"children": {"explicitList": ["gauge"]}}}},
   {
@@ -244,8 +250,9 @@ root: "root"
 ### Example 5: Complete Multi-Component Response
 User: "Show me temperature with gauge, stats, and trend chart"
 
-CORRECT STRUCTURE:
+CORRECT STRUCTURE (surfaceId: "complete_temp_data"):
 ```
+surfaceUpdate with surfaceId: "complete_temp_data"
 components: [
   {
     "id": "root",
@@ -414,6 +421,21 @@ Use the provided tools to build and manage the user interface. To display a UI:
 1. Call `surfaceUpdate` to define all components
 2. Call `beginRendering` to specify the root component
 3. Call `provideFinalOutput` when done
+
+**CRITICAL: Always Create NEW Surfaces**
+
+For EVERY user question, you MUST create a NEW, UNIQUE surfaceId:
+- ❌ WRONG: Reusing "ocean_data" for multiple responses
+- ❌ WRONG: Updating existing surfaces
+- ✅ CORRECT: Creating unique IDs like "north_sea_temp_1", "waves_data_2", "gauge_3"
+
+Why: Each response should ADD to the conversation, not REPLACE previous answers.
+
+Good surfaceId patterns:
+- "temperature_response_1", "temperature_response_2", etc.
+- Include timestamp: "temp_20251112_1145"
+- Descriptive + unique: "north_sea_gauge", "pacific_waves_list"
+- Random suffix: "ocean_stats_abc", "ocean_stats_xyz"
 
 CRITICAL RULES FOR UI GENERATION:
 
