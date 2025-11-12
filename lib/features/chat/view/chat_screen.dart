@@ -61,12 +61,12 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     _textController.clear();
-    
+
     // Save to history BEFORE sending (so it shows up immediately)
     QueryHistory.addQuery(text).then((_) {
       _loadQueryHistory();
     });
-    
+
     _viewModel.send(text);
 
     // Scroll to bottom after new message
@@ -530,12 +530,21 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    // Save to favorites storage
+    // Save to favorites storage with message index
     if (_favoritedIndices.contains(index)) {
-      final query = index > 0 ? _viewModel.messages[index - 1].text ?? '' : '';
+      // Find the user query that triggered this response
+      String query = '';
+      for (int i = index - 1; i >= 0; i--) {
+        if (_viewModel.messages[i].isUser) {
+          query = _viewModel.messages[i].text ?? '';
+          break;
+        }
+      }
+      
       await Favorites.addFavorite(
         query: query,
         response: message.text ?? 'Visualization',
+        messageIndex: index, // Save the exact message index
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -548,26 +557,40 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _jumpToFavorite(String query) {
-    // Find the message index that matches this query
-    final messageIndex = _viewModel.messages.indexWhere(
+  void _jumpToFavorite(int? savedIndex, String query) {
+    // Try to use saved index first, otherwise search for it
+    int messageIndex = savedIndex ?? _viewModel.messages.indexWhere(
       (m) => m.isUser && m.text == query,
     );
     
-    if (messageIndex != -1) {
-      // Calculate approximate scroll position
-      // Each message is roughly 100-150 pixels
-      final targetPosition = messageIndex * 120.0;
+    if (messageIndex != -1 && messageIndex < _viewModel.messages.length) {
+      // Calculate scroll position based on item height
+      // Average message height is about 100-200px, but we'll be conservative
+      const double estimatedItemHeight = 150.0;
+      final targetPosition = messageIndex * estimatedItemHeight;
       
-      _scrollController.jumpTo(
-        targetPosition.clamp(0.0, _scrollController.position.maxScrollExtent),
-      );
-      
-      // Show a snackbar to confirm
+      // Ensure we don't scroll past the end
+      if (_scrollController.hasClients) {
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final scrollTo = targetPosition.clamp(0.0, maxScroll);
+        
+        _scrollController.jumpTo(scrollTo);
+        
+        // Show confirmation
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('📍 Jumped to: "$query"'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.cyan[700],
+          ),
+        );
+      }
+    } else {
+      // Message not found in current conversation
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Jumped to: "$query"'),
-          duration: const Duration(seconds: 2),
+        const SnackBar(
+          content: Text('Message not found in current conversation'),
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -646,11 +669,14 @@ class _ChatScreenState extends State<ChatScreen> {
                                 tooltip: 'Jump to conversation',
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  _jumpToFavorite(fav.query);
+                                  _jumpToFavorite(fav.messageIndex, fav.query);
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                ),
                                 tooltip: 'Remove favorite',
                                 onPressed: () async {
                                   await Favorites.removeFavorite(fav.id);

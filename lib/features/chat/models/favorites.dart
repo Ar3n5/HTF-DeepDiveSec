@@ -7,12 +7,14 @@ class FavoriteItem {
   final String query;
   final String response;
   final DateTime timestamp;
+  final int? messageIndex;
 
   FavoriteItem({
     required this.id,
     required this.query,
     required this.response,
     required this.timestamp,
+    this.messageIndex,
   });
 
   Map<String, dynamic> toJson() => {
@@ -20,6 +22,7 @@ class FavoriteItem {
     'query': query,
     'response': response,
     'timestamp': timestamp.toIso8601String(),
+    'messageIndex': messageIndex,
   };
 
   factory FavoriteItem.fromJson(Map<String, dynamic> json) => FavoriteItem(
@@ -27,6 +30,7 @@ class FavoriteItem {
     query: json['query'] as String,
     response: json['response'] as String,
     timestamp: DateTime.parse(json['timestamp'] as String),
+    messageIndex: json['messageIndex'] as int?,
   );
 }
 
@@ -38,6 +42,7 @@ class Favorites {
   static Future<void> addFavorite({
     required String query,
     required String response,
+    int? messageIndex,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final favorites = await getFavorites();
@@ -47,6 +52,7 @@ class Favorites {
       query: query,
       response: response,
       timestamp: DateTime.now(),
+      messageIndex: messageIndex,
     );
     
     favorites.insert(0, item);
