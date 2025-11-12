@@ -518,12 +518,13 @@ class _MessageView extends StatelessWidget {
       },
     );
   }
+}
 
+class _ChatScreenState extends State<ChatScreen> {
   void _showHistoryDialog() {
     showDialog(
       context: context,
-      builder: (context) => FadePageRoute(
-        builder: (context) => Dialog(
+      builder: (context) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
@@ -603,7 +604,7 @@ class _MessageView extends StatelessWidget {
             ),
           ),
         ),
-      ).buildPage(context, const AlwaysStoppedAnimation(1.0), const AlwaysStoppedAnimation(0.0)),
+      ),
     );
   }
 }

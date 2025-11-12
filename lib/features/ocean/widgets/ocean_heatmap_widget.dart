@@ -172,10 +172,10 @@ class OceanHeatmap extends StatelessWidget {
     if (max == min) return colorScale[2]; // Middle color
     
     final normalized = (value - min) / (max - min);
-    final index = (normalized * (colorScale.length - 1)).clamp(0, colorScale.length - 1);
+    final index = (normalized * (colorScale.length - 1)).clamp(0.0, (colorScale.length - 1).toDouble());
     final lowerIndex = index.floor();
     final upperIndex = (lowerIndex + 1).clamp(0, colorScale.length - 1);
-    final t = index - lowerIndex;
+    final t = (index - lowerIndex).toDouble();
     
     return Color.lerp(colorScale[lowerIndex], colorScale[upperIndex], t)!;
   }
@@ -209,10 +209,10 @@ class _HeatmapPainter extends CustomPainter {
       final value = (data[i]['value'] as num).toDouble();
       
       final normalized = (value - minValue) / (maxValue - minValue);
-      final colorIndex = (normalized * (colorScale.length - 1)).clamp(0, colorScale.length - 1);
+      final colorIndex = (normalized * (colorScale.length - 1)).clamp(0.0, (colorScale.length - 1).toDouble());
       final lowerIndex = colorIndex.floor();
       final upperIndex = (lowerIndex + 1).clamp(0, colorScale.length - 1);
-      final t = colorIndex - lowerIndex;
+      final t = (colorIndex - lowerIndex).toDouble();
       
       final color = Color.lerp(colorScale[lowerIndex], colorScale[upperIndex], t)!;
       
