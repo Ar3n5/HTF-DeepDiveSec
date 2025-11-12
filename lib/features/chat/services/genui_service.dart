@@ -1,12 +1,26 @@
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:flutter_genui_firebase_ai/flutter_genui_firebase_ai.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_catalog_items.dart';
+import 'package:hack_the_future_starter/core/api_keys.dart';
 
 class GenUiService {
   Catalog createCatalog() => OceanCatalogItems.createOceanCatalog();
 
-  FirebaseAiContentGenerator createContentGenerator({Catalog? catalog}) {
+  ContentGenerator createContentGenerator({Catalog? catalog}) {
     final cat = catalog ?? createCatalog();
+    
+    // Check if using direct Gemini API or Firebase Vertex AI
+    if (ApiKeys.useDirectGeminiApi) {
+      // TODO: Implement direct Gemini API generator
+      // For now, fall back to Firebase
+      throw UnimplementedError(
+        'Direct Gemini API not yet fully implemented. '
+        'Set ApiKeys.useDirectGeminiApi = false to use Firebase Vertex AI, '
+        'or configure your Gemini API key in lib/core/api_keys.dart'
+      );
+    }
+    
+    // Use Firebase Vertex AI (default)
     return FirebaseAiContentGenerator(
       catalog: cat,
       systemInstruction: _oceanExplorerPrompt,
