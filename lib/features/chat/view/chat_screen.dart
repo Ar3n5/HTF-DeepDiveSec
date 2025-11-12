@@ -329,17 +329,14 @@ class _ChatScreenState extends State<ChatScreen> {
                             },
                             child: TextField(
                               controller: _textController,
-                              decoration: InputDecoration(
-                                hintText: l10n.hintTypeMessage,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                helperText:
-                                    'Enter to send, Shift+Enter for new line',
-                                helperStyle: const TextStyle(fontSize: 10),
-                              ),
+                             decoration: InputDecoration(
+                               hintText: l10n.hintTypeMessage,
+                               border: const OutlineInputBorder(),
+                               contentPadding: const EdgeInsets.symmetric(
+                                 horizontal: 12,
+                                 vertical: 8,
+                               ),
+                             ),
                               maxLines: 5,
                               minLines: 1,
                               keyboardType: TextInputType.multiline,
@@ -503,6 +500,30 @@ class _MessageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if this is a placeholder widget
+    if (model.placeholderWidget != null) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.scale(
+              scale: 0.95 + (value * 0.05),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: model.placeholderWidget,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     final surfaceId = model.surfaceId;
 
     if (surfaceId == null) {

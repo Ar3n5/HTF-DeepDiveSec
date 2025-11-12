@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/features/chat/models/chat_message.dart';
 import 'package:hack_the_future_starter/features/chat/models/agent_log.dart';
 import 'package:hack_the_future_starter/features/chat/services/genui_service.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_stats_card.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_chart_widget.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_gauge_widget.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_interactive_map.dart';
 
 class ChatViewModel extends ChangeNotifier {
   ChatViewModel({GenUiService? service}) : _service = service ?? GenUiService();
@@ -188,27 +193,30 @@ class ChatViewModel extends ChangeNotifier {
   void _showPlaceholderVisualization() {
     final lowerQuery = _lastUserQuery.toLowerCase();
     String visualizationType = 'ocean data visualization';
-    
+
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
       visualizationType = 'temperature stats, gauges, and trend charts';
     } else if (lowerQuery.contains('wave') || lowerQuery.contains('height')) {
       visualizationType = 'wave height stats and charts';
-    } else if (lowerQuery.contains('location') || lowerQuery.contains('where') || 
-               lowerQuery.contains('map')) {
+    } else if (lowerQuery.contains('location') ||
+        lowerQuery.contains('where') ||
+        lowerQuery.contains('map')) {
       visualizationType = 'interactive maps with ocean locations';
     } else if (lowerQuery.contains('salinity') || lowerQuery.contains('salt')) {
       visualizationType = 'salinity measurements and trends';
     }
 
-    
-    _messages.add(ChatMessageModel(
-      text: '⚠️ API RATE LIMITED\n\n'
+    _messages.add(
+      ChatMessageModel(
+        text:
+            '⚠️ API RATE LIMITED\n\n'
             'The Gemini API is currently overloaded. Your question was:\n'
             '"$_lastUserQuery"\n\n'
             '📊 To see $visualizationType with placeholder data:\n'
             '1️⃣ Click the dashboard button (📊 top right)\n'
             '2️⃣ Wait 60 seconds, then try asking again\n\n'
             'The dashboard has: temperature gauges, wave charts, interactive maps, heatmaps, and more!',
-    ));
+      ),
+    );
   }
 }
