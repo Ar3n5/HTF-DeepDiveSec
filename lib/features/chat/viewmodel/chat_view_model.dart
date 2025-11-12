@@ -192,31 +192,83 @@ class ChatViewModel extends ChangeNotifier {
   /// Show placeholder visualization when API is rate limited
   void _showPlaceholderVisualization() {
     final lowerQuery = _lastUserQuery.toLowerCase();
-    String visualizationType = 'ocean data visualization';
-
+    
+    // Add warning message
+    _messages.add(ChatMessageModel(
+      text: '⚠️ API RATE LIMITED - Showing placeholder data below.\n'
+            'Wait 60 seconds before trying again.',
+    ));
+    
+    // Determine and show appropriate placeholder widget
+    Widget placeholderWidget;
+    
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
-      visualizationType = 'temperature stats, gauges, and trend charts';
+      if (lowerQuery.contains('gauge') || lowerQuery.contains('meter')) {
+        placeholderWidget = const OceanGauge(
+          title: 'Ocean Temperature (PLACEHOLDER)',
+          value: 18.5,
+          min: 0,
+          max: 30,
+          unit: '°C',
+          color: Colors.orange,
+        );
+      } else if (lowerQuery.contains('trend') || lowerQuery.contains('chart')) {
+        placeholderWidget = const OceanLineChart(
+          title: 'Temperature Trends (PLACEHOLDER)',
+          dataPoints: [
+            {'timestamp': '2024-01-01', 'value': 15.2},
+            {'timestamp': '2024-01-08', 'value': 16.1},
+            {'timestamp': '2024-01-15', 'value': 17.3},
+            {'timestamp': '2024-01-22', 'value': 18.5},
+            {'timestamp': '2024-01-29', 'value': 17.8},
+          ],
+          unit: '°C',
+          color: Colors.orange,
+        );
+      } else {
+        placeholderWidget = const OceanStatsCard(
+          title: 'Ocean Temperature (PLACEHOLDER)',
+          value: '18.5°C',
+          icon: Icons.thermostat,
+          color: Colors.orange,
+          subtitle: 'Placeholder - API rate limited',
+          min: '12.3°C',
+          max: '24.1°C',
+          average: '18.5°C',
+        );
+      }
     } else if (lowerQuery.contains('wave') || lowerQuery.contains('height')) {
-      visualizationType = 'wave height stats and charts';
-    } else if (lowerQuery.contains('location') ||
-        lowerQuery.contains('where') ||
-        lowerQuery.contains('map')) {
-      visualizationType = 'interactive maps with ocean locations';
-    } else if (lowerQuery.contains('salinity') || lowerQuery.contains('salt')) {
-      visualizationType = 'salinity measurements and trends';
+      placeholderWidget = const OceanStatsCard(
+        title: 'Wave Height (PLACEHOLDER)',
+        value: '3.2m',
+        icon: Icons.waves,
+        color: Colors.blue,
+        subtitle: 'Placeholder - API rate limited',
+        min: '1.5m',
+        max: '4.8m',
+        average: '3.2m',
+      );
+    } else if (lowerQuery.contains('location') || lowerQuery.contains('where') || 
+               lowerQuery.contains('map') || lowerQuery.contains('sea')) {
+      placeholderWidget = const OceanInteractiveMap(
+        title: 'Ocean Locations (PLACEHOLDER)',
+        locations: [
+          {'name': 'Red Sea', 'latitude': 22.0, 'longitude': 38.0, 'value': '28°C'},
+          {'name': 'Mediterranean', 'latitude': 35.0, 'longitude': 18.0, 'value': '24°C'},
+          {'name': 'Arabian Sea', 'latitude': 15.0, 'longitude': 65.0, 'value': '26°C'},
+        ],
+      );
+    } else {
+      placeholderWidget = const OceanStatsCard(
+        title: 'Ocean Data (PLACEHOLDER)',
+        value: 'Available',
+        icon: Icons.water_drop,
+        color: Colors.blue,
+        subtitle: 'Placeholder - API rate limited',
+      );
     }
-
-    _messages.add(
-      ChatMessageModel(
-        text:
-            '⚠️ API RATE LIMITED\n\n'
-            'The Gemini API is currently overloaded. Your question was:\n'
-            '"$_lastUserQuery"\n\n'
-            '📊 To see $visualizationType with placeholder data:\n'
-            '1️⃣ Click the dashboard button (📊 top right)\n'
-            '2️⃣ Wait 60 seconds, then try asking again\n\n'
-            'The dashboard has: temperature gauges, wave charts, interactive maps, heatmaps, and more!',
-      ),
-    );
+    
+    _messages.add(ChatMessageModel(placeholderWidget: placeholderWidget));
+    notifyListeners();
   }
 }

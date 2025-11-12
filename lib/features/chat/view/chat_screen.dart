@@ -329,14 +329,14 @@ class _ChatScreenState extends State<ChatScreen> {
                             },
                             child: TextField(
                               controller: _textController,
-                             decoration: InputDecoration(
-                               hintText: l10n.hintTypeMessage,
-                               border: const OutlineInputBorder(),
-                               contentPadding: const EdgeInsets.symmetric(
-                                 horizontal: 12,
-                                 vertical: 8,
-                               ),
-                             ),
+                              decoration: InputDecoration(
+                                hintText: l10n.hintTypeMessage,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
                               maxLines: 5,
                               minLines: 1,
                               keyboardType: TextInputType.multiline,
