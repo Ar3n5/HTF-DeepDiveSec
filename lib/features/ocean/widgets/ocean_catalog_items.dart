@@ -245,7 +245,8 @@ class OceanCatalogItems {
     ),
     widgetBuilder: (itemContext) {
       final data = itemContext.data as JsonMap;
-      final dataPoints = (data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final dataPoints =
+          (data['data'] as List?)?.cast<Map<String, dynamic>>() ?? [];
       return OceanHeatmap(
         title: data['title'] as String,
         data: dataPoints,

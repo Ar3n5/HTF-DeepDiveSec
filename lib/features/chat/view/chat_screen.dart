@@ -5,8 +5,10 @@ import 'package:hack_the_future_starter/l10n/app_localizations.dart';
 import 'package:hack_the_future_starter/core/theme_provider.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
 import 'package:hack_the_future_starter/features/chat/widgets/ocean_background.dart';
+import 'package:hack_the_future_starter/core/page_transitions.dart';
 
 import '../models/chat_message.dart';
+import '../models/query_history.dart';
 import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
   late final ChatViewModel _viewModel;
+  List<String> _queryHistory = [];
 
   @override
   void initState() {
@@ -31,6 +34,16 @@ class _ChatScreenState extends State<ChatScreen> {
     // Auto-scroll when messages change
     _viewModel.addListener(() {
       _scrollToBottom();
+    });
+    
+    // Load query history
+    _loadQueryHistory();
+  }
+
+  Future<void> _loadQueryHistory() async {
+    final history = await QueryHistory.getHistory();
+    setState(() {
+      _queryHistory = history;
     });
   }
 
@@ -48,11 +61,20 @@ class _ChatScreenState extends State<ChatScreen> {
     _textController.clear();
     _viewModel.send(text);
     
+    // Save to history
+    QueryHistory.addQuery(text);
+    _loadQueryHistory();
+    
     // Scroll to bottom after new message
     _scrollToBottom();
     
     // Also scroll when response is added (with a slight delay)
     Future.delayed(const Duration(milliseconds: 500), _scrollToBottom);
+  }
+
+  void _sendHistoryQuery(String query) {
+    _textController.text = query;
+    _send();
   }
 
   void _scrollToBottom() {
@@ -85,13 +107,16 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Query History',
+            onPressed: _showHistoryDialog,
+          ),
+          IconButton(
             icon: const Icon(Icons.dashboard),
             tooltip: 'View Components',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OceanComponentsDemo(),
-                ),
+                OceanPageRoute(builder: (context) => const OceanComponentsDemo()),
               );
             },
           ),
@@ -491,6 +516,94 @@ class _MessageView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showHistoryDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => FadePageRoute(
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.history, color: Colors.cyan),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Query History',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_queryHistory.isEmpty)
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'No query history yet.\nAsk a question to get started!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _queryHistory.length,
+                      itemBuilder: (context, index) {
+                        final query = _queryHistory[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.cyan.withOpacity(0.2),
+                            child: Text('${index + 1}'),
+                          ),
+                          title: Text(query),
+                          trailing: const Icon(Icons.arrow_forward, size: 16),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _sendHistoryQuery(query);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                if (_queryHistory.isNotEmpty) ...[
+                  const Divider(),
+                  TextButton.icon(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    label: const Text(
+                      'Clear History',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onPressed: () {
+                      QueryHistory.clearHistory();
+                      setState(() {
+                        _queryHistory = [];
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ).buildPage(context, const AlwaysStoppedAnimation(1.0), const AlwaysStoppedAnimation(0.0)),
     );
   }
 }
