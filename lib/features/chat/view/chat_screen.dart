@@ -173,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-                // Processing Indicator with Abort Button
+                // Processing Indicator (Abort temporarily disabled)
                 ValueListenableBuilder<bool>(
                   valueListenable: _viewModel.isProcessing,
                   builder: (_, isProcessing, __) {
@@ -181,25 +181,21 @@ class _ChatScreenState extends State<ChatScreen> {
                     return Container(
                       padding: const EdgeInsets.all(8.0),
                       color: Colors.blue[50],
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          const SizedBox(width: 12),
-                          const Text('Agent processing...',
+                          SizedBox(width: 12),
+                          Text('Agent processing...',
                               style: TextStyle(fontSize: 12)),
-                          const SizedBox(width: 12),
-                          TextButton.icon(
-                            icon: const Icon(Icons.stop, size: 16),
-                            label: const Text('Abort'),
-                            onPressed: _viewModel.abort,
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
-                            ),
+                          SizedBox(width: 12),
+                          Text(
+                            '(Please wait, this may take 10-20 seconds)',
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ],
                       ),

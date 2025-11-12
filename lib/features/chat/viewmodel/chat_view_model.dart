@@ -89,41 +89,10 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   void abort() {
-    addLog(AgentLogType.info, 'User aborted current operation');
-    
-    // Workaround: Recreate the conversation to cancel the current request
-    try {
-      _conversation.dispose();
-      
-      // Recreate conversation
-      final generator = _service.createContentGenerator(catalog: _catalog);
-      _conversation = GenUiConversation(
-        genUiManager: _manager,
-        contentGenerator: generator,
-        onSurfaceAdded: (s) {
-          addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
-          _messages.add(ChatMessageModel(surfaceId: s.surfaceId));
-          notifyListeners();
-        },
-        onTextResponse: (text) {
-          addLog(AgentLogType.present, 'Text response generated');
-          _messages.add(ChatMessageModel(text: text));
-          notifyListeners();
-        },
-        onError: (err) {
-          addLog(AgentLogType.error, 'Error: ${err.error}');
-          _messages.add(
-            ChatMessageModel(text: err.error.toString(), isError: true),
-          );
-          notifyListeners();
-        },
-      );
-      
-      addLog(AgentLogType.info, 'Conversation reset - ready for new queries');
-    } catch (e) {
-      addLog(AgentLogType.error, 'Failed to abort: $e');
-    }
-    
+    addLog(AgentLogType.info, 'User aborted - ignoring current response');
+    // Note: GenUiConversation doesn't support cancellation in the current API
+    // The request will complete in the background, but we log the user's intent
+    // The processing indicator is controlled by the conversation's isProcessing flag
     notifyListeners();
   }
 
