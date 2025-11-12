@@ -52,11 +52,14 @@ class ChatViewModel extends ChangeNotifier {
         addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
         _messages.add(ChatMessageModel(surfaceId: s.surfaceId));
         notifyListeners();
+        // Small delay to ensure UI updates before scrolling
+        Future.delayed(const Duration(milliseconds: 100), notifyListeners);
       },
       onTextResponse: (text) {
         addLog(AgentLogType.present, 'Text response generated');
         _messages.add(ChatMessageModel(text: text));
         notifyListeners();
+        Future.delayed(const Duration(milliseconds: 100), notifyListeners);
       },
       onError: (err) {
         addLog(AgentLogType.error, 'Error: ${err.error}');

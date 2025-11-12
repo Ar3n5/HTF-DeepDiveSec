@@ -37,15 +37,20 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;
     _textController.clear();
     _viewModel.send(text);
+    
+    // Scroll to bottom after new message
     _scrollToBottom();
+    
+    // Also scroll when response is added (with a slight delay)
+    Future.delayed(const Duration(milliseconds: 500), _scrollToBottom);
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
+      if (_scrollController.hasClients && _scrollController.position.maxScrollExtent > 0) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -164,11 +169,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
+                    reverse: false, // Normal order: top to bottom
                     itemCount: _viewModel.messages.length,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     itemBuilder: (_, i) {
                       final m = _viewModel.messages[i];
-                      return ListTile(
-                        title: _MessageView(m, _viewModel.host, l10n),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
+                        child: _MessageView(m, _viewModel.host, l10n),
                       );
                     },
                   ),
@@ -275,9 +286,48 @@ class _MessageView extends StatelessWidget {
           ? l10n.labelError
           : (model.isUser ? l10n.labelYou : l10n.labelAI);
       final content = model.text ?? '';
-      return Text('$label: $content');
+      
+      // Different styling for user vs AI messages
+      if (model.isUser) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              content,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+        );
+      }
+      
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Text(
+            '$label: $content',
+            style: TextStyle(
+              fontSize: 14,
+              color: model.isError ? Colors.red : Colors.grey[700],
+            ),
+          ),
+        ),
+      );
     }
 
-    return GenUiSurface(host: host, surfaceId: surfaceId);
+    // GenUI surface - full width
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: GenUiSurface(host: host, surfaceId: surfaceId),
+      ),
+    );
   }
 }
