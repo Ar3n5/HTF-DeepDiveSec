@@ -66,13 +66,21 @@ class ChatViewModel extends ChangeNotifier {
         final errorMsg = err.error.toString();
         addLog(AgentLogType.error, 'Error: $errorMsg');
         
-        // Check if rate limited - show placeholder visualizations
+        // Check if rate limited - show helpful message
         if (errorMsg.contains('overload') || 
             errorMsg.contains('rate limit') ||
             errorMsg.contains('quota') ||
             errorMsg.contains('429')) {
-          addLog(AgentLogType.info, 'API rate limited - showing placeholder data');
-          _showPlaceholderResponse(_lastUserQuery);
+          addLog(AgentLogType.info, 'API rate limited - suggesting dashboard');
+          _messages.add(ChatMessageModel(
+            text: '⚠️ API RATE LIMITED\n\n'
+                  'The Gemini API is currently overloaded. Please:\n\n'
+                  '1️⃣ Wait 60 seconds before trying again\n'
+                  '2️⃣ Click the 📊 dashboard button (top right) to see all ocean visualizations with placeholder data\n\n'
+                  'Your question was: "$_lastUserQuery"\n\n'
+                  'The dashboard shows examples of all components: temperature gauges, wave charts, '
+                  'interactive maps, and more!',
+          ));
         } else {
           _messages.add(
             ChatMessageModel(text: 'Error: $errorMsg', isError: true),
@@ -117,205 +125,5 @@ class ChatViewModel extends ChangeNotifier {
 
   void disposeConversation() {
     _conversation.dispose();
-  }
-
-  /// Show placeholder data when rate limited
-  void _showPlaceholderResponse(String query) {
-    final lowerQuery = query.toLowerCase();
-    
-    // Add warning banner
-    _messages.add(ChatMessageModel(
-      text: '⚠️ API RATE LIMITED - Showing placeholder data below. '
-            'Wait 60 seconds before trying again.',
-    ));
-    
-    // Create a surface with placeholder data based on query
-    final surfaceId = 'placeholder_${DateTime.now().millisecondsSinceEpoch}';
-    
-    try {
-      final surface = _manager.getOrCreateSurface(surfaceId);
-      
-      // Determine what type of visualization to show
-      if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
-        _showPlaceholderTemperature(surface, lowerQuery);
-      } else if (lowerQuery.contains('wave') || lowerQuery.contains('height')) {
-        _showPlaceholderWaves(surface, lowerQuery);
-      } else if (lowerQuery.contains('salinity') || lowerQuery.contains('salt')) {
-        _showPlaceholderSalinity(surface, lowerQuery);
-      } else if (lowerQuery.contains('location') || lowerQuery.contains('where') || 
-                 lowerQuery.contains('map')) {
-        _showPlaceholderLocations(surface);
-      } else {
-        // Default: show general ocean stats
-        _showPlaceholderGeneral(surface);
-      }
-      
-      _messages.add(ChatMessageModel(surfaceId: surfaceId));
-      notifyListeners();
-    } catch (e) {
-      addLog(AgentLogType.error, 'Failed to create placeholder: $e');
-    }
-  }
-
-  void _showPlaceholderTemperature(Surface surface, String query) {
-    if (query.contains('gauge') || query.contains('meter')) {
-      // Show as gauge
-      surface.update([
-        GenUiComponentData(
-          id: 'placeholder_gauge',
-          componentName: 'OceanGauge',
-          data: {
-            'title': 'Ocean Temperature (PLACEHOLDER)',
-            'value': 18.5,
-            'unit': '°C',
-            'min': 0.0,
-            'max': 30.0,
-            'color': 'orange',
-          },
-        ),
-      ]);
-    } else if (query.contains('trend') || query.contains('over time') || 
-               query.contains('chart')) {
-      // Show as line chart
-      surface.update([
-        GenUiComponentData(
-          id: 'placeholder_chart',
-          componentName: 'OceanLineChart',
-          data: {
-            'title': 'Ocean Temperature Trends (PLACEHOLDER)',
-            'dataPoints': [
-              {'timestamp': '2024-01-01', 'value': 15.2},
-              {'timestamp': '2024-01-08', 'value': 16.1},
-              {'timestamp': '2024-01-15', 'value': 17.3},
-              {'timestamp': '2024-01-22', 'value': 18.5},
-              {'timestamp': '2024-01-29', 'value': 17.8},
-            ],
-            'unit': '°C',
-            'color': 'orange',
-          },
-        ),
-      ]);
-    } else {
-      // Show as stats card
-      surface.update([
-        GenUiComponentData(
-          id: 'placeholder_stats',
-          componentName: 'OceanStatsCard',
-          data: {
-            'title': 'Ocean Temperature (PLACEHOLDER)',
-            'value': '18.5°C',
-            'icon': 'thermostat',
-            'color': 'orange',
-            'subtitle': 'Current measurement',
-            'min': '12.3°C',
-            'max': '24.1°C',
-            'average': '18.5°C',
-          },
-        ),
-      ]);
-    }
-  }
-
-  void _showPlaceholderWaves(Surface surface, String query) {
-    if (query.contains('gauge')) {
-      surface.update([
-        GenUiComponentData(
-          id: 'placeholder_gauge',
-          componentName: 'OceanGauge',
-          data: {
-            'title': 'Wave Height (PLACEHOLDER)',
-            'value': 3.2,
-            'unit': 'm',
-            'min': 0.0,
-            'max': 10.0,
-            'color': 'blue',
-          },
-        ),
-      ]);
-    } else {
-      surface.update([
-        GenUiComponentData(
-          id: 'placeholder_stats',
-          componentName: 'OceanStatsCard',
-          data: {
-            'title': 'Wave Height (PLACEHOLDER)',
-            'value': '3.2m',
-            'icon': 'waves',
-            'color': 'blue',
-            'subtitle': 'Current measurement',
-            'min': '1.5m',
-            'max': '4.8m',
-            'average': '3.2m',
-          },
-        ),
-      ]);
-    }
-  }
-
-  void _showPlaceholderSalinity(Surface surface, String query) {
-    surface.update([
-      GenUiComponentData(
-        id: 'placeholder_stats',
-        componentName: 'OceanStatsCard',
-        data: {
-          'title': 'Salinity (PLACEHOLDER)',
-          'value': '35.5 PSU',
-          'icon': 'water_drop',
-          'color': 'teal',
-          'subtitle': 'Practical Salinity Unit',
-          'min': '32.1 PSU',
-          'max': '37.8 PSU',
-          'average': '35.5 PSU',
-        },
-      ),
-    ]);
-  }
-
-  void _showPlaceholderLocations(Surface surface) {
-    surface.update([
-      GenUiComponentData(
-        id: 'placeholder_map',
-        componentName: 'OceanInteractiveMap',
-        data: {
-          'title': 'Ocean Measurement Locations (PLACEHOLDER)',
-          'locations': [
-            {
-              'name': 'North Atlantic',
-              'latitude': 45.0,
-              'longitude': -30.0,
-              'value': '18.5°C'
-            },
-            {
-              'name': 'Pacific Ocean',
-              'latitude': 10.0,
-              'longitude': -150.0,
-              'value': '22.1°C'
-            },
-            {
-              'name': 'Indian Ocean',
-              'latitude': -15.0,
-              'longitude': 75.0,
-              'value': '26.3°C'
-            },
-          ],
-        },
-      ),
-    ]);
-  }
-
-  void _showPlaceholderGeneral(Surface surface) {
-    surface.update([
-      GenUiComponentData(
-        id: 'placeholder_stats',
-        componentName: 'OceanStatsCard',
-        data: {
-          'title': 'Ocean Conditions (PLACEHOLDER)',
-          'value': 'Data Available',
-          'icon': 'info',
-          'color': 'blue',
-          'subtitle': 'Placeholder data shown due to rate limiting',
-        },
-      ),
-    ]);
   }
 }
