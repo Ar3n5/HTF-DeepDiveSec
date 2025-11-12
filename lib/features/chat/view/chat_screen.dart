@@ -283,17 +283,36 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFF1565C0)
-                              : Theme.of(context).primaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.send),
-                          onPressed: _send,
-                          color: Colors.white,
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 300),
+                          builder: (context, value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? const Color(0xFF1565C0)
+                                      : Theme.of(context).primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.send),
+                                  onPressed: _send,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -347,52 +366,92 @@ class _MessageView extends StatelessWidget {
       // Different styling for user vs AI messages
       if (model.isUser) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1565C0) : Colors.blue[100],
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Text(
-              content,
-              style: TextStyle(
-                fontSize: 15,
-                color: isDark ? Colors.white : Colors.black87,
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(20 * (1 - value), 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1565C0) : Colors.blue[100],
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      content,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       }
       
       // AI text responses - styled like message bubbles
       final isDark = Theme.of(context).brightness == Brightness.dark;
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: model.isError 
-                ? (isDark ? Colors.red[900]!.withOpacity(0.3) : Colors.red[50])
-                : (isDark ? const Color(0xFF2D2D2D) : Colors.grey[100]),
-            borderRadius: BorderRadius.circular(18),
-            border: model.isError
-                ? Border.all(color: Colors.red, width: 1)
-                : null,
-          ),
-          child: Text(
-            content,
-            style: TextStyle(
-              fontSize: 14,
-              color: model.isError 
-                  ? Colors.red[300]
-                  : (isDark ? Colors.white : Colors.grey[800]),
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(-20 * (1 - value), 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: model.isError 
+                        ? (isDark ? Colors.red[900]!.withOpacity(0.3) : Colors.red[50])
+                        : (isDark ? const Color(0xFF2D2D2D) : Colors.grey[100]),
+                    borderRadius: BorderRadius.circular(18),
+                    border: model.isError
+                        ? Border.all(color: Colors.red, width: 1)
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    content,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: model.isError 
+                          ? Colors.red[300]
+                          : (isDark ? Colors.white : Colors.grey[800]),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       );
     }
 
