@@ -6,10 +6,6 @@ import 'package:hack_the_future_starter/core/theme_provider.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
 import 'package:hack_the_future_starter/features/chat/widgets/ocean_background.dart';
 import 'package:hack_the_future_starter/core/page_transitions.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 import '../models/chat_message.dart';
 import '../models/query_history.dart';
@@ -28,7 +24,6 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
-  final _screenshotController = ScreenshotController();
   late final ChatViewModel _viewModel;
   List<String> _queryHistory = [];
   final Set<int> _favoritedIndices = {};
@@ -88,11 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients &&
           _scrollController.position.maxScrollExtent > 0) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
   }
@@ -575,38 +566,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<void> _shareMessage(int index, ChatMessageModel message) async {
-    try {
-      final imageBytes = await _screenshotController.capture();
-      if (imageBytes == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to capture screenshot')),
-          );
-        }
-        return;
-      }
-
-      // Save to temp file
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/ocean_visualization.png');
-      await file.writeAsBytes(imageBytes);
-
-      // Share the file
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text:
-            'Ocean Explorer Visualization: ${message.text ?? "Check this out!"}',
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Share failed: $e')));
-      }
-    }
-  }
-
   void _showFavoritesDialog() async {
     final favorites = await Favorites.getFavorites();
 
@@ -711,14 +670,12 @@ class _MessageView extends StatelessWidget {
   const _MessageView(
     this.model,
     this.host,
-    this.l10n, {
-    this.screenshotController,
-  });
+    this.l10n,
+  );
 
   final ChatMessageModel model;
   final GenUiHost host;
   final AppLocalizations l10n;
-  final ScreenshotController? screenshotController;
 
   @override
   Widget build(BuildContext context) {
@@ -737,12 +694,7 @@ class _MessageView extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 800),
-                  child: screenshotController != null
-                      ? Screenshot(
-                          controller: screenshotController!,
-                          child: model.placeholderWidget!,
-                        )
-                      : model.placeholderWidget,
+                  child: model.placeholderWidget,
                 ),
               ),
             ),
@@ -872,12 +824,7 @@ class _MessageView extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 800),
-                child: screenshotController != null
-                    ? Screenshot(
-                        controller: screenshotController!,
-                        child: GenUiSurface(host: host, surfaceId: surfaceId),
-                      )
-                    : GenUiSurface(host: host, surfaceId: surfaceId),
+                child: GenUiSurface(host: host, surfaceId: surfaceId),
               ),
             ),
           ),
