@@ -128,7 +128,7 @@ class OceanCatalogItems {
     },
   );
 
-  /// OceanMap - Map widget with location markers
+  /// OceanMap - Map widget with location markers (static)
   static final oceanMap = CatalogItem(
     name: 'OceanMap',
     dataSchema: s.S.object(
@@ -154,6 +154,38 @@ class OceanCatalogItems {
       final locations =
           (data['locations'] as List?)?.cast<Map<String, dynamic>>() ?? [];
       return OceanMapWidget(
+        title: data['title'] as String,
+        locations: locations,
+      );
+    },
+  );
+
+  /// OceanInteractiveMap - Interactive map with OpenStreetMap (zoom/pan)
+  static final oceanInteractiveMap = CatalogItem(
+    name: 'OceanInteractiveMap',
+    dataSchema: s.S.object(
+      properties: {
+        'title': s.S.string(description: 'Map title'),
+        'locations': s.S.list(
+          description: 'Array of location objects',
+          items: s.S.object(
+            properties: {
+              'name': s.S.string(description: 'Location name'),
+              'latitude': s.S.number(description: 'Latitude'),
+              'longitude': s.S.number(description: 'Longitude'),
+              'value': s.S.string(description: 'Measurement value'),
+            },
+            required: ['name', 'latitude', 'longitude'],
+          ),
+        ),
+      },
+      required: ['title', 'locations'],
+    ),
+    widgetBuilder: (itemContext) {
+      final data = itemContext.data as JsonMap;
+      final locations =
+          (data['locations'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      return OceanInteractiveMap(
         title: data['title'] as String,
         locations: locations,
       );
