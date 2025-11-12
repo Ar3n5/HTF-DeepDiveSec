@@ -207,7 +207,7 @@ class ChatViewModel extends ChangeNotifier {
 
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
       if (lowerQuery.contains('gauge') || lowerQuery.contains('meter')) {
-        placeholderWidget = const OceanGauge(
+        placeholderWidget = OceanGauge(
           title: 'Ocean Temperature (PLACEHOLDER)',
           value: 18.5,
           min: 0,
