@@ -12,7 +12,7 @@ class OceanCatalogItems {
     // - Container, Padding for styling
     // These are sufficient for creating ocean data visualizations
     return CoreCatalogItems.asCatalog();
-    
+
     // TODO: Add custom ocean components like:
     // - OceanDataCard (Card with icon and formatted measurements)
     // - OceanLineChart (time series visualization)
@@ -21,4 +21,3 @@ class OceanCatalogItems {
     // Once the exact GenUI CatalogItem API is confirmed
   }
 }
-
