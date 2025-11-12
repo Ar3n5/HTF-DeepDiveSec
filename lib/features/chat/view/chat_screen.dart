@@ -7,7 +7,6 @@ import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_
 import 'package:hack_the_future_starter/features/chat/widgets/ocean_background.dart';
 
 import '../models/chat_message.dart';
-import '../models/agent_log.dart';
 import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -365,9 +364,6 @@ class _MessageView extends StatelessWidget {
     final surfaceId = model.surfaceId;
 
     if (surfaceId == null) {
-      final label = model.isError
-          ? l10n.labelError
-          : (model.isUser ? l10n.labelYou : l10n.labelAI);
       final content = model.text ?? '';
       
       // Different styling for user vs AI messages
