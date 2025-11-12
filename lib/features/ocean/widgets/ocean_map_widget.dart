@@ -63,24 +63,37 @@ class OceanMapWidget extends StatelessWidget {
     final lat = location['latitude'] ?? location['lat'] ?? 0.0;
     final lon = location['longitude'] ?? location['lon'] ?? 0.0;
     final value = location['value'];
+    final index = locations.indexOf(location) + 1;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
+          // Show the location number
           Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
               color: Colors.red,
               shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: Center(
+              child: Text(
+                '$index',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               '$name (${lat.toStringAsFixed(1)}°, ${lon.toStringAsFixed(1)}°)',
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
           if (value != null)
@@ -88,7 +101,7 @@ class OceanMapWidget extends StatelessWidget {
               value.toString(),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 13,
               ),
             ),
         ],
@@ -174,24 +187,33 @@ class _MapPainter extends CustomPainter {
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke;
 
-      // Draw pin shape (teardrop)
+      // Draw larger pin with better visibility
+      final pinSize = 12.0;
+      
+      // Draw pin shape (teardrop) - larger
       final pinPath = Path();
-      pinPath.addOval(Rect.fromCircle(center: Offset(x, y - 4), radius: 8));
-      pinPath.moveTo(x, y + 4);
-      pinPath.lineTo(x - 5, y - 2);
-      pinPath.lineTo(x + 5, y - 2);
+      pinPath.addOval(Rect.fromCircle(center: Offset(x, y - 6), radius: pinSize));
+      pinPath.moveTo(x, y + 6);
+      pinPath.lineTo(x - 8, y - 4);
+      pinPath.lineTo(x + 8, y - 4);
       pinPath.close();
 
       canvas.drawPath(pinPath, markerPaint);
       canvas.drawPath(pinPath, borderPaint);
       
-      // Draw location number
+      // Draw white circle background for number
+      final numberCirclePaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x, y - 6), 9, numberCirclePaint);
+      
+      // Draw location number - larger and more visible
       final textPainter = TextPainter(
         text: TextSpan(
           text: '${i + 1}',
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
+            color: Colors.red,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -200,56 +222,115 @@ class _MapPainter extends CustomPainter {
       textPainter.layout();
       textPainter.paint(
         canvas,
-        Offset(x - textPainter.width / 2, y - 8),
+        Offset(x - textPainter.width / 2, y - 14),
       );
     }
   }
 
   void _drawContinents(Canvas canvas, Size size) {
-    // Simplified continent shapes for context
+    // More realistic continent shapes
     final continentPaint = Paint()
-      ..color = Colors.green[100]!.withOpacity(0.3)
+      ..color = const Color(0xFF8BC34A).withOpacity(0.4)
       ..style = PaintingStyle.fill;
 
     final continentBorder = Paint()
-      ..color = Colors.green[200]!.withOpacity(0.4)
-      ..strokeWidth = 1
+      ..color = const Color(0xFF689F38).withOpacity(0.5)
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    // North America (simplified)
+    // North America (more detailed)
     final northAmerica = Path();
-    northAmerica.moveTo(size.width * 0.15, size.height * 0.25);
-    northAmerica.lineTo(size.width * 0.25, size.height * 0.2);
-    northAmerica.lineTo(size.width * 0.3, size.height * 0.3);
-    northAmerica.lineTo(size.width * 0.28, size.height * 0.45);
-    northAmerica.lineTo(size.width * 0.2, size.height * 0.5);
-    northAmerica.lineTo(size.width * 0.15, size.height * 0.4);
+    northAmerica.moveTo(size.width * 0.12, size.height * 0.15); // Alaska
+    northAmerica.lineTo(size.width * 0.18, size.height * 0.12);
+    northAmerica.lineTo(size.width * 0.22, size.height * 0.18); // Canada
+    northAmerica.lineTo(size.width * 0.28, size.height * 0.22);
+    northAmerica.lineTo(size.width * 0.26, size.height * 0.32); // US East Coast
+    northAmerica.lineTo(size.width * 0.22, size.height * 0.38); // Florida
+    northAmerica.lineTo(size.width * 0.20, size.height * 0.45); // Mexico
+    northAmerica.lineTo(size.width * 0.18, size.height * 0.48); // Central America
+    northAmerica.lineTo(size.width * 0.15, size.height * 0.42); // West Coast
+    northAmerica.lineTo(size.width * 0.10, size.height * 0.30);
+    northAmerica.lineTo(size.width * 0.12, size.height * 0.20);
     northAmerica.close();
     canvas.drawPath(northAmerica, continentPaint);
     canvas.drawPath(northAmerica, continentBorder);
 
-    // Europe/Africa (simplified)
-    final europeAfrica = Path();
-    europeAfrica.moveTo(size.width * 0.48, size.height * 0.25);
-    europeAfrica.lineTo(size.width * 0.55, size.height * 0.22);
-    europeAfrica.lineTo(size.width * 0.58, size.height * 0.35);
-    europeAfrica.lineTo(size.width * 0.56, size.height * 0.55);
-    europeAfrica.lineTo(size.width * 0.5, size.height * 0.65);
-    europeAfrica.lineTo(size.width * 0.46, size.height * 0.5);
-    europeAfrica.close();
-    canvas.drawPath(europeAfrica, continentPaint);
-    canvas.drawPath(europeAfrica, continentBorder);
+    // South America
+    final southAmerica = Path();
+    southAmerica.moveTo(size.width * 0.22, size.height * 0.52);
+    southAmerica.lineTo(size.width * 0.26, size.height * 0.50);
+    southAmerica.lineTo(size.width * 0.28, size.height * 0.58);
+    southAmerica.lineTo(size.width * 0.27, size.height * 0.70);
+    southAmerica.lineTo(size.width * 0.24, size.height * 0.78);
+    southAmerica.lineTo(size.width * 0.22, size.height * 0.75);
+    southAmerica.lineTo(size.width * 0.20, size.height * 0.65);
+    southAmerica.close();
+    canvas.drawPath(southAmerica, continentPaint);
+    canvas.drawPath(southAmerica, continentBorder);
 
-    // Asia/Australia region (simplified)
+    // Europe
+    final europe = Path();
+    europe.moveTo(size.width * 0.48, size.height * 0.20);
+    europe.lineTo(size.width * 0.52, size.height * 0.18);
+    europe.lineTo(size.width * 0.55, size.height * 0.22);
+    europe.lineTo(size.width * 0.54, size.height * 0.28);
+    europe.lineTo(size.width * 0.50, size.height * 0.30);
+    europe.lineTo(size.width * 0.47, size.height * 0.26);
+    europe.close();
+    canvas.drawPath(europe, continentPaint);
+    canvas.drawPath(europe, continentBorder);
+
+    // Africa
+    final africa = Path();
+    africa.moveTo(size.width * 0.50, size.height * 0.32);
+    africa.lineTo(size.width * 0.54, size.height * 0.30);
+    africa.lineTo(size.width * 0.58, size.height * 0.35);
+    africa.lineTo(size.width * 0.58, size.height * 0.45);
+    africa.lineTo(size.width * 0.56, size.height * 0.58);
+    africa.lineTo(size.width * 0.52, size.height * 0.68);
+    africa.lineTo(size.width * 0.48, size.height * 0.65);
+    africa.lineTo(size.width * 0.47, size.height * 0.52);
+    africa.lineTo(size.width * 0.48, size.height * 0.40);
+    africa.close();
+    canvas.drawPath(africa, continentPaint);
+    canvas.drawPath(africa, continentBorder);
+
+    // Asia
     final asia = Path();
-    asia.moveTo(size.width * 0.65, size.height * 0.2);
-    asia.lineTo(size.width * 0.85, size.height * 0.25);
-    asia.lineTo(size.width * 0.88, size.height * 0.4);
-    asia.lineTo(size.width * 0.78, size.height * 0.55);
-    asia.lineTo(size.width * 0.68, size.height * 0.45);
+    asia.moveTo(size.width * 0.58, size.height * 0.18);
+    asia.lineTo(size.width * 0.75, size.height * 0.15);
+    asia.lineTo(size.width * 0.82, size.height * 0.20);
+    asia.lineTo(size.width * 0.85, size.height * 0.30);
+    asia.lineTo(size.width * 0.82, size.height * 0.40);
+    asia.lineTo(size.width * 0.75, size.height * 0.42);
+    asia.lineTo(size.width * 0.68, size.height * 0.38);
+    asia.lineTo(size.width * 0.62, size.height * 0.32);
+    asia.lineTo(size.width * 0.58, size.height * 0.25);
     asia.close();
     canvas.drawPath(asia, continentPaint);
     canvas.drawPath(asia, continentBorder);
+
+    // Australia
+    final australia = Path();
+    australia.moveTo(size.width * 0.78, size.height * 0.58);
+    australia.lineTo(size.width * 0.85, size.height * 0.56);
+    australia.lineTo(size.width * 0.88, size.height * 0.62);
+    australia.lineTo(size.width * 0.86, size.height * 0.68);
+    australia.lineTo(size.width * 0.80, size.height * 0.68);
+    australia.lineTo(size.width * 0.76, size.height * 0.64);
+    australia.close();
+    canvas.drawPath(australia, continentPaint);
+    canvas.drawPath(australia, continentBorder);
+
+    // Antarctica (bottom)
+    final antarctica = Path();
+    antarctica.moveTo(size.width * 0.0, size.height * 0.88);
+    antarctica.lineTo(size.width * 1.0, size.height * 0.88);
+    antarctica.lineTo(size.width * 1.0, size.height * 0.95);
+    antarctica.lineTo(size.width * 0.0, size.height * 0.95);
+    antarctica.close();
+    canvas.drawPath(antarctica, continentPaint);
+    canvas.drawPath(antarctica, continentBorder);
   }
 
   @override

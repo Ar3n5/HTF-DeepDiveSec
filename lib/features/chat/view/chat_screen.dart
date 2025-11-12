@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/l10n/app_localizations.dart';
 import 'package:hack_the_future_starter/core/theme_provider.dart';
@@ -231,18 +232,38 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          controller: _textController,
-                          decoration: InputDecoration(
-                            hintText: l10n.hintTypeMessage,
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                        child: KeyboardListener(
+                          focusNode: FocusNode(),
+                          onKeyEvent: (event) {
+                            if (event is KeyDownEvent &&
+                                event.logicalKey == LogicalKeyboardKey.enter) {
+                              // Check if Shift is pressed
+                              final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
+                              
+                              if (!isShiftPressed) {
+                                // Enter alone - send message
+                                _send();
+                              }
+                              // Shift+Enter - allow new line (do nothing, default behavior)
+                            }
+                          },
+                          child: TextField(
+                            controller: _textController,
+                            decoration: InputDecoration(
+                              hintText: l10n.hintTypeMessage,
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              helperText: 'Enter to send, Shift+Enter for new line',
+                              helperStyle: const TextStyle(fontSize: 10),
                             ),
+                            maxLines: 5,
+                            minLines: 1,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
                           ),
-                          onSubmitted: (_) => _send(),
-                          maxLines: null,
                         ),
                       ),
                       const SizedBox(width: 8),

@@ -39,19 +39,28 @@ class ThemeProvider extends ChangeNotifier {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.dark,
+        ).copyWith(
+          surface: const Color(0xFF1E1E1E),
+          surfaceContainerHighest: const Color(0xFF2D2D2D),
         ),
-        scaffoldBackgroundColor: Colors.grey[900],
+        scaffoldBackgroundColor: const Color(0xFF121212),
         cardTheme: CardThemeData(
           elevation: 4,
-          color: Colors.grey[850],
+          color: const Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: 0,
-          backgroundColor: Colors.grey[850],
+          backgroundColor: Color(0xFF1E1E1E),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+          titleLarge: TextStyle(color: Colors.white),
+          titleMedium: TextStyle(color: Colors.white),
         ),
       );
 }
