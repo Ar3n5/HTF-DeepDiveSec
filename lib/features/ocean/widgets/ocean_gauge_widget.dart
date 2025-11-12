@@ -22,6 +22,10 @@ class OceanGaugeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.grey[800]!;
+    final subtitleColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -34,7 +38,7 @@ class OceanGaugeWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: textColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -47,6 +51,7 @@ class OceanGaugeWidget extends StatelessWidget {
                   min: min,
                   max: max,
                   color: color,
+                  isDarkMode: isDark,
                 ),
                 child: Container(),
               ),
@@ -54,7 +59,7 @@ class OceanGaugeWidget extends StatelessWidget {
             const SizedBox(height: 16),
             RichText(
               text: TextSpan(
-                style: TextStyle(color: Colors.grey[800]),
+                style: TextStyle(color: textColor),
                 children: [
                   TextSpan(
                     text: value.toStringAsFixed(1),
@@ -79,7 +84,7 @@ class OceanGaugeWidget extends StatelessWidget {
               'Range: $min - $max $unit',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: subtitleColor,
               ),
             ),
           ],
@@ -94,12 +99,14 @@ class _GaugePainter extends CustomPainter {
   final double min;
   final double max;
   final Color color;
+  final bool isDarkMode;
 
   _GaugePainter({
     required this.value,
     required this.min,
     required this.max,
     required this.color,
+    this.isDarkMode = false,
   });
 
   @override
@@ -185,7 +192,11 @@ class _GaugePainter extends CustomPainter {
     // Min label
     textPainter.text = TextSpan(
       text: min.toStringAsFixed(0),
-      style: TextStyle(color: Colors.grey[700], fontSize: 12),
+      style: TextStyle(
+        color: isDarkMode ? Colors.white : Colors.grey[700],
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
     );
     textPainter.layout();
     textPainter.paint(
@@ -196,7 +207,11 @@ class _GaugePainter extends CustomPainter {
     // Max label
     textPainter.text = TextSpan(
       text: max.toStringAsFixed(0),
-      style: TextStyle(color: Colors.grey[700], fontSize: 12),
+      style: TextStyle(
+        color: isDarkMode ? Colors.white : Colors.grey[700],
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
     );
     textPainter.layout();
     textPainter.paint(

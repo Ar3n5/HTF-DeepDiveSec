@@ -197,29 +197,45 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-                // Processing Indicator (Abort temporarily disabled)
+                // Processing Indicator with Abort Button
                 ValueListenableBuilder<bool>(
                   valueListenable: _viewModel.isProcessing,
                   builder: (_, isProcessing, __) {
                     if (!isProcessing) return const SizedBox.shrink();
                     return Container(
                       padding: const EdgeInsets.all(8.0),
-                      color: Colors.blue[50],
-                      child: const Row(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF2D2D2D)
+                          : Colors.blue[50],
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          SizedBox(width: 12),
-                          Text('Agent processing...',
+                          const SizedBox(width: 12),
+                          const Text('Agent processing...',
                               style: TextStyle(fontSize: 12)),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Text(
-                            '(Please wait, this may take 10-20 seconds)',
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                            '(May take 10-20 seconds)',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[400]
+                                  : Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton.icon(
+                            icon: const Icon(Icons.stop, size: 16),
+                            label: const Text('Abort'),
+                            onPressed: _viewModel.abort,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
                           ),
                         ],
                       ),
@@ -322,18 +338,22 @@ class _MessageView extends StatelessWidget {
       
       // Different styling for user vs AI messages
       if (model.isUser) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Align(
           alignment: Alignment.centerRight,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.blue[100],
+              color: isDark ? const Color(0xFF1565C0) : Colors.blue[100],
               borderRadius: BorderRadius.circular(18),
             ),
             child: Text(
               content,
-              style: const TextStyle(fontSize: 15),
+              style: TextStyle(
+                fontSize: 15,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
             ),
           ),
         );

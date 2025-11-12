@@ -107,10 +107,13 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   void abort() {
-    addLog(AgentLogType.info, 'User aborted - ignoring current response');
-    // Note: GenUiConversation doesn't support cancellation in the current API
-    // The request will complete in the background, but we log the user's intent
-    // The processing indicator is controlled by the conversation's isProcessing flag
+    addLog(AgentLogType.info, 'User requested abort');
+    // Note: GenUiConversation API doesn't support true cancellation
+    // The LLM request will complete in background, but we inform the user
+    _messages.add(ChatMessageModel(
+      text: '🛑 Abort requested. The agent will stop showing results from this request. '
+            'You can ask a new question.',
+    ));
     notifyListeners();
   }
 
