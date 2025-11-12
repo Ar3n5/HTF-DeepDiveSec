@@ -33,32 +33,6 @@ class FavoriteItem {
 /// Manages favorite ocean queries and responses
 class Favorites {
   static const String _key = 'ocean_favorites';
-    final String id;
-    final String query;
-    final String response;
-    final DateTime timestamp;
-
-    FavoriteItem({
-      required this.id,
-      required this.query,
-      required this.response,
-      required this.timestamp,
-    });
-
-    Map<String, dynamic> toJson() => {
-      'id': id,
-      'query': query,
-      'response': response,
-      'timestamp': timestamp.toIso8601String(),
-    };
-
-    factory FavoriteItem.fromJson(Map<String, dynamic> json) => FavoriteItem(
-      id: json['id'] as String,
-      query: json['query'] as String,
-      response: json['response'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-    );
-  }
 
   /// Add a favorite
   static Future<void> addFavorite({
@@ -114,4 +88,3 @@ class Favorites {
     await prefs.remove(_key);
   }
 }
-

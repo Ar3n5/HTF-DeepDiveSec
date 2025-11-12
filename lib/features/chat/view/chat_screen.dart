@@ -13,7 +13,7 @@ import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
   final ThemeProvider? themeProvider;
-  
+
   const ChatScreen({super.key, this.themeProvider});
 
   @override
@@ -30,12 +30,12 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _viewModel = ChatViewModel()..init();
-    
+
     // Auto-scroll when messages change
     _viewModel.addListener(() {
       _scrollToBottom();
     });
-    
+
     // Load query history
     _loadQueryHistory();
   }
@@ -60,14 +60,14 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isEmpty) return;
     _textController.clear();
     _viewModel.send(text);
-    
+
     // Save to history
     QueryHistory.addQuery(text);
     _loadQueryHistory();
-    
+
     // Scroll to bottom after new message
     _scrollToBottom();
-    
+
     // Also scroll when response is added (with a slight delay)
     Future.delayed(const Duration(milliseconds: 500), _scrollToBottom);
   }
@@ -79,7 +79,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients && _scrollController.position.maxScrollExtent > 0) {
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent > 0) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
@@ -105,268 +106,288 @@ class _ChatScreenState extends State<ChatScreen> {
               Text(l10n.appBarTitle),
             ],
           ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: 'Query History',
-            onPressed: _showHistoryDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.dashboard),
-            tooltip: 'View Components',
-            onPressed: () {
-              Navigator.of(context).push(
-                OceanPageRoute(builder: (context) => const OceanComponentsDemo()),
-              );
-            },
-          ),
-          // Dark/Light mode toggle
-          if (widget.themeProvider != null)
+          actions: [
             IconButton(
-              icon: Icon(widget.themeProvider!.isDarkMode
-                  ? Icons.light_mode
-                  : Icons.dark_mode),
-              tooltip: 'Toggle Theme',
-              onPressed: widget.themeProvider!.toggleTheme,
+              icon: const Icon(Icons.history),
+              tooltip: 'Query History',
+              onPressed: _showHistoryDialog,
             ),
-          IconButton(
-            icon: Icon(_viewModel.showAgentLog
-                ? Icons.visibility_off
-                : Icons.visibility),
-            tooltip: 'Toggle Agent Log',
-            onPressed: _viewModel.toggleAgentLog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Clear Logs',
-            onPressed: _viewModel.clearLogs,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: AnimatedBuilder(
-          animation: _viewModel,
-          builder: (context, _) {
-            return Column(
-              children: [
-                // Agent Log Panel
-                if (_viewModel.showAgentLog)
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[700]!),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8.0),
-                          color: Colors.grey[850],
-                          child: Row(
-                            children: [
-                              const Icon(Icons.terminal,
-                                  color: Colors.green, size: 16),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Agent Run Log',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${_viewModel.agentLogs.length} entries',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
-                          ),
+            IconButton(
+              icon: const Icon(Icons.dashboard),
+              tooltip: 'View Components',
+              onPressed: () {
+                Navigator.of(context).push(
+                  OceanPageRoute(
+                    builder: (context) => const OceanComponentsDemo(),
+                  ),
+                );
+              },
+            ),
+            // Dark/Light mode toggle
+            if (widget.themeProvider != null)
+              IconButton(
+                icon: Icon(
+                  widget.themeProvider!.isDarkMode
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                tooltip: 'Toggle Theme',
+                onPressed: widget.themeProvider!.toggleTheme,
+              ),
+            IconButton(
+              icon: Icon(
+                _viewModel.showAgentLog
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+              ),
+              tooltip: 'Toggle Agent Log',
+              onPressed: _viewModel.toggleAgentLog,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Clear Logs',
+              onPressed: _viewModel.clearLogs,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: AnimatedBuilder(
+            animation: _viewModel,
+            builder: (context, _) {
+              return Column(
+                children: [
+                  // Agent Log Panel
+                  if (_viewModel.showAgentLog)
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[700]!),
                         ),
-                        Expanded(
-                          child: ListView.builder(
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
                             padding: const EdgeInsets.all(8.0),
-                            itemCount: _viewModel.agentLogs.length,
-                            itemBuilder: (_, i) {
-                              final log = _viewModel.agentLogs[i];
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Text(
-                                  log.toString(),
+                            color: Colors.grey[850],
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.terminal,
+                                  color: Colors.green,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Agent Run Log',
                                   style: TextStyle(
-                                    fontFamily: 'monospace',
-                                    fontSize: 11,
-                                    color: _getLogColor(log.type),
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                // Messages List
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    reverse: false, // Normal order: top to bottom
-                    itemCount: _viewModel.messages.length,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemBuilder: (_, i) {
-                      final m = _viewModel.messages[i];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 4.0,
-                        ),
-                        child: _MessageView(m, _viewModel.host, l10n),
-                      );
-                    },
-                  ),
-                ),
-                // Processing Indicator with Abort Button
-                ValueListenableBuilder<bool>(
-                  valueListenable: _viewModel.isProcessing,
-                  builder: (_, isProcessing, __) {
-                    if (!isProcessing) return const SizedBox.shrink();
-                    final isDark = Theme.of(context).brightness == Brightness.dark;
-                    return Container(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.cyan,
+                                const Spacer(),
+                                Text(
+                                  '${_viewModel.agentLogs.length} entries',
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Agent processing...',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark ? Colors.cyan[200] : Colors.blue[800],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '(May take 10-20 seconds)',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isDark ? Colors.grey[400] : Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          TextButton.icon(
-                            icon: const Icon(Icons.stop, size: 16),
-                            label: const Text('Abort'),
-                            onPressed: _viewModel.abort,
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              backgroundColor: Colors.red.withOpacity(0.1),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(8.0),
+                              itemCount: _viewModel.agentLogs.length,
+                              itemBuilder: (_, i) {
+                                final log = _viewModel.agentLogs[i];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 2.0,
+                                  ),
+                                  child: Text(
+                                    log.toString(),
+                                    style: TextStyle(
+                                      fontFamily: 'monospace',
+                                      fontSize: 11,
+                                      color: _getLogColor(log.type),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
-                // Input Row
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: KeyboardListener(
-                          focusNode: FocusNode(),
-                          onKeyEvent: (event) {
-                            if (event is KeyDownEvent &&
-                                event.logicalKey == LogicalKeyboardKey.enter) {
-                              // Check if Shift is pressed
-                              final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
-                              
-                              if (!isShiftPressed) {
-                                // Enter alone - send message
-                                _send();
-                              }
-                              // Shift+Enter - allow new line (do nothing, default behavior)
-                            }
-                          },
-                          child: TextField(
-                            controller: _textController,
-                            decoration: InputDecoration(
-                              hintText: l10n.hintTypeMessage,
-                              border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
+                    ),
+                  // Messages List
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      reverse: false, // Normal order: top to bottom
+                      itemCount: _viewModel.messages.length,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemBuilder: (_, i) {
+                        final m = _viewModel.messages[i];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          child: _MessageView(m, _viewModel.host, l10n),
+                        );
+                      },
+                    ),
+                  ),
+                  // Processing Indicator with Abort Button
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _viewModel.isProcessing,
+                    builder: (_, isProcessing, __) {
+                      if (!isProcessing) return const SizedBox.shrink();
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
+                      return Container(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.cyan,
                               ),
-                              helperText: 'Enter to send, Shift+Enter for new line',
-                              helperStyle: const TextStyle(fontSize: 10),
                             ),
-                            maxLines: 5,
-                            minLines: 1,
-                            keyboardType: TextInputType.multiline,
-                            textInputAction: TextInputAction.newline,
+                            const SizedBox(width: 12),
+                            Text(
+                              'Agent processing...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? Colors.cyan[200]
+                                    : Colors.blue[800],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '(May take 10-20 seconds)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            TextButton.icon(
+                              icon: const Icon(Icons.stop, size: 16),
+                              label: const Text('Abort'),
+                              onPressed: _viewModel.abort,
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                                backgroundColor: Colors.red.withOpacity(0.1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  // Input Row
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: KeyboardListener(
+                            focusNode: FocusNode(),
+                            onKeyEvent: (event) {
+                              if (event is KeyDownEvent &&
+                                  event.logicalKey ==
+                                      LogicalKeyboardKey.enter) {
+                                // Check if Shift is pressed
+                                final isShiftPressed =
+                                    HardwareKeyboard.instance.isShiftPressed;
+
+                                if (!isShiftPressed) {
+                                  // Enter alone - send message
+                                  _send();
+                                }
+                                // Shift+Enter - allow new line (do nothing, default behavior)
+                              }
+                            },
+                            child: TextField(
+                              controller: _textController,
+                              decoration: InputDecoration(
+                                hintText: l10n.hintTypeMessage,
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                helperText:
+                                    'Enter to send, Shift+Enter for new line',
+                                helperStyle: const TextStyle(fontSize: 10),
+                              ),
+                              maxLines: 5,
+                              minLines: 1,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 300),
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? const Color(0xFF1565C0)
-                                    : Theme.of(context).primaryColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
+                        const SizedBox(width: 8),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 300),
+                          builder: (context, value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF1565C0)
+                                      : Theme.of(context).primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.send),
+                                  onPressed: _send,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: IconButton(
-                                icon: const Icon(Icons.send),
-                                onPressed: _send,
-                                color: Colors.white,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -403,7 +424,7 @@ class _MessageView extends StatelessWidget {
 
     if (surfaceId == null) {
       final content = model.text ?? '';
-      
+
       // Different styling for user vs AI messages
       if (model.isUser) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -420,9 +441,14 @@ class _MessageView extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Container(
                     constraints: const BoxConstraints(maxWidth: 500),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1565C0) : Colors.blue[100],
+                      color: isDark
+                          ? const Color(0xFF1565C0)
+                          : Colors.blue[100],
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
@@ -446,7 +472,7 @@ class _MessageView extends StatelessWidget {
           },
         );
       }
-      
+
       // AI text responses - styled like message bubbles
       final isDark = Theme.of(context).brightness == Brightness.dark;
       return TweenAnimationBuilder<double>(
@@ -462,10 +488,15 @@ class _MessageView extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 500),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: model.isError 
-                        ? (isDark ? Colors.red[900]!.withOpacity(0.3) : Colors.red[50])
+                    color: model.isError
+                        ? (isDark
+                              ? Colors.red[900]!.withOpacity(0.3)
+                              : Colors.red[50])
                         : (isDark ? const Color(0xFF2D2D2D) : Colors.grey[100]),
                     borderRadius: BorderRadius.circular(18),
                     border: model.isError
@@ -483,7 +514,7 @@ class _MessageView extends StatelessWidget {
                     content,
                     style: TextStyle(
                       fontSize: 14,
-                      color: model.isError 
+                      color: model.isError
                           ? Colors.red[300]
                           : (isDark ? Colors.white : Colors.grey[800]),
                     ),
@@ -537,10 +568,7 @@ class _MessageView extends StatelessWidget {
                   const SizedBox(width: 12),
                   const Text(
                     'Query History',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
