@@ -28,10 +28,17 @@ class OceanCatalogItems {
       properties: {
         'title': s.S.string(description: 'Title of the measurement'),
         'value': s.S.string(description: 'Current value as string'),
-        'unit': s.S.string(description: 'Unit of measurement (e.g., °C, PSU, m)'),
+        'unit': s.S.string(
+          description: 'Unit of measurement (e.g., °C, PSU, m)',
+        ),
         'subtitle': s.S.string(description: 'Additional context or location'),
-        'icon': s.S.string(description: 'Icon name: thermostat, waves, water_drop, place, speed, science, air'),
-        'color': s.S.string(description: 'Color: blue, orange, green, red, teal, purple, cyan'),
+        'icon': s.S.string(
+          description:
+              'Icon name: thermostat, waves, water_drop, place, speed, science, air',
+        ),
+        'color': s.S.string(
+          description: 'Color: blue, orange, green, red, teal, purple, cyan',
+        ),
         'min': s.S.number(description: 'Minimum value (optional)'),
         'max': s.S.number(description: 'Maximum value (optional)'),
         'avg': s.S.number(description: 'Average value (optional)'),
@@ -71,13 +78,16 @@ class OceanCatalogItems {
           ),
         ),
         'unit': s.S.string(description: 'Unit of measurement'),
-        'color': s.S.string(description: 'Color: blue, orange, green, red, teal'),
+        'color': s.S.string(
+          description: 'Color: blue, orange, green, red, teal',
+        ),
       },
       required: ['title', 'dataPoints'],
     ),
     widgetBuilder: (itemContext) {
       final data = itemContext.data as JsonMap;
-      final dataPoints = (data['dataPoints'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final dataPoints =
+          (data['dataPoints'] as List?)?.cast<Map<String, dynamic>>() ?? [];
       return OceanLineChart(
         title: data['title'] as String,
         dataPoints: dataPoints,
@@ -97,7 +107,9 @@ class OceanCatalogItems {
         'min': s.S.number(description: 'Minimum range value'),
         'max': s.S.number(description: 'Maximum range value'),
         'unit': s.S.string(description: 'Unit of measurement'),
-        'color': s.S.string(description: 'Color: blue, orange, green, red, teal'),
+        'color': s.S.string(
+          description: 'Color: blue, orange, green, red, teal',
+        ),
       },
       required: ['title', 'value', 'min', 'max'],
     ),
@@ -137,7 +149,8 @@ class OceanCatalogItems {
     ),
     widgetBuilder: (itemContext) {
       final data = itemContext.data as JsonMap;
-      final locations = (data['locations'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final locations =
+          (data['locations'] as List?)?.cast<Map<String, dynamic>>() ?? [];
       return OceanMapWidget(
         title: data['title'] as String,
         locations: locations,
@@ -153,7 +166,9 @@ class OceanCatalogItems {
         'name': s.S.string(description: 'Location name'),
         'latitude': s.S.number(description: 'Latitude'),
         'longitude': s.S.number(description: 'Longitude'),
-        'rank': s.S.integer(description: 'Rank number (1=gold, 2=silver, 3=bronze)'),
+        'rank': s.S.integer(
+          description: 'Rank number (1=gold, 2=silver, 3=bronze)',
+        ),
         'measurements': s.S.object(
           description: 'Map of measurement names to values',
         ),
