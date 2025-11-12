@@ -1,8 +1,6 @@
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:flutter_genui_firebase_ai/flutter_genui_firebase_ai.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_catalog_items.dart';
-import 'package:hack_the_future_starter/core/api_keys.dart';
-import 'gemini_direct_generator.dart';
 
 class GenUiService {
   Catalog createCatalog() => OceanCatalogItems.createOceanCatalog();
@@ -10,26 +8,8 @@ class GenUiService {
   ContentGenerator createContentGenerator({Catalog? catalog}) {
     final cat = catalog ?? createCatalog();
     
-    // Check if using direct Gemini API or Firebase Vertex AI
-    if (ApiKeys.useDirectGeminiApi) {
-      // Use direct Gemini API (Google AI Studio)
-      if (ApiKeys.geminiApiKey == 'YOUR_GEMINI_API_KEY_HERE' || 
-          ApiKeys.geminiApiKey.isEmpty) {
-        throw Exception(
-          'Gemini API key not configured!\n\n'
-          'Please add your API key in lib/core/api_keys.dart\n'
-          'Get your key from: https://aistudio.google.com/app/apikey'
-        );
-      }
-      
-      return GeminiDirectContentGenerator(
-        apiKey: ApiKeys.geminiApiKey,
-        catalog: cat,
-        systemInstruction: _oceanExplorerPrompt,
-      );
-    }
-    
-    // Use Firebase Vertex AI (default)
+    // Use Firebase AI (which uses Gemini API under the hood)
+    // This is the recommended and working solution for the hackathon
     return FirebaseAiContentGenerator(
       catalog: cat,
       systemInstruction: _oceanExplorerPrompt,
