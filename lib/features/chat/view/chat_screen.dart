@@ -249,41 +249,25 @@ class _ChatScreenState extends State<ChatScreen> {
                                   m,
                                   _viewModel.host,
                                   l10n,
-                                  screenshotController: _screenshotController,
                                 ),
                               ),
-                              // Add favorite and share buttons for AI responses
+                              // Add favorite button for AI responses
                               if (!m.isUser &&
                                   m.text != null &&
                                   !m.isError) ...[
                                 const SizedBox(width: 8),
-                                Column(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        _favoritedIndices.contains(i)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: _favoritedIndices.contains(i)
-                                            ? Colors.red
-                                            : Colors.grey,
-                                        size: 20,
-                                      ),
-                                      tooltip: 'Favorite',
-                                      onPressed: () => _toggleFavorite(i, m),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                              // Share button for surfaces and placeholder widgets
-                              if (m.surfaceId != null ||
-                                  m.placeholderWidget != null) ...[
-                                const SizedBox(width: 8),
                                 IconButton(
-                                  icon: const Icon(Icons.share, size: 20),
-                                  color: Colors.blue,
-                                  tooltip: 'Share',
-                                  onPressed: () => _shareMessage(i, m),
+                                  icon: Icon(
+                                    _favoritedIndices.contains(i)
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: _favoritedIndices.contains(i)
+                                        ? Colors.red
+                                        : Colors.grey,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Favorite',
+                                  onPressed: () => _toggleFavorite(i, m),
                                 ),
                               ],
                             ],
@@ -667,11 +651,7 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _MessageView extends StatelessWidget {
-  const _MessageView(
-    this.model,
-    this.host,
-    this.l10n,
-  );
+  const _MessageView(this.model, this.host, this.l10n);
 
   final ChatMessageModel model;
   final GenUiHost host;
