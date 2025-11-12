@@ -41,13 +41,60 @@ class OceanMapWidget extends StatelessWidget {
             Container(
               height: 300,
               decoration: BoxDecoration(
-                color: Colors.lightBlue[50],
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue[200]!, width: 2),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[700]!
+                      : Colors.blue[200]!,
+                  width: 2,
+                ),
               ),
-              child: CustomPaint(
-                painter: _MapPainter(locations: locations),
-                child: Container(),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  children: [
+                    // Real world map from Wikimedia Commons
+                    Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg',
+                      width: double.infinity,
+                      height: 300,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback to custom painted map if image fails to load
+                        return CustomPaint(
+                          painter: _MapPainter(locations: locations),
+                          child: Container(),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Loading world map...',
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white
+                                      : Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    // Overlay location markers
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _LocationMarkerPainter(locations: locations),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -110,48 +157,18 @@ class OceanMapWidget extends StatelessWidget {
   }
 }
 
-class _MapPainter extends CustomPainter {
+class _LocationMarkerPainter extends CustomPainter {
   final List<Map<String, dynamic>> locations;
 
-  _MapPainter({required this.locations});
+  _LocationMarkerPainter({required this.locations});
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw ocean background with gradient
-    final oceanPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.lightBlue[100]!,
-          Colors.blue[200]!,
-          Colors.blue[300]!,
-        ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), oceanPaint);
+    // Only draw location markers on top of the real map image
+    _drawLocationMarkers(canvas, size);
+  }
 
-    // Draw simplified continents for context
-    _drawContinents(canvas, size);
-
-    // Draw grid lines (latitude/longitude)
-    final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    // Vertical lines (longitude) - every 30 degrees
-    for (var i = 0; i <= 12; i++) {
-      final x = size.width * i / 12;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-
-    // Horizontal lines (latitude) - every 30 degrees
-    for (var i = 0; i <= 6; i++) {
-      final y = size.height * i / 6;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-
+  void _drawLocationMarkers(Canvas canvas, Size size) {
     // Draw location markers with pulse effect
     for (var i = 0; i < locations.length; i++) {
       final location = locations[i];
@@ -227,113 +244,39 @@ class _MapPainter extends CustomPainter {
     }
   }
 
-  void _drawContinents(Canvas canvas, Size size) {
-    // More realistic continent shapes
-    final continentPaint = Paint()
-      ..color = const Color(0xFF8BC34A).withOpacity(0.4)
-      ..style = PaintingStyle.fill;
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
 
-    final continentBorder = Paint()
-      ..color = const Color(0xFF689F38).withOpacity(0.5)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
+// Fallback map painter if the image doesn't load
+class _MapPainter extends CustomPainter {
+  final List<Map<String, dynamic>> locations;
 
-    // North America (more detailed)
-    final northAmerica = Path();
-    northAmerica.moveTo(size.width * 0.12, size.height * 0.15); // Alaska
-    northAmerica.lineTo(size.width * 0.18, size.height * 0.12);
-    northAmerica.lineTo(size.width * 0.22, size.height * 0.18); // Canada
-    northAmerica.lineTo(size.width * 0.28, size.height * 0.22);
-    northAmerica.lineTo(size.width * 0.26, size.height * 0.32); // US East Coast
-    northAmerica.lineTo(size.width * 0.22, size.height * 0.38); // Florida
-    northAmerica.lineTo(size.width * 0.20, size.height * 0.45); // Mexico
-    northAmerica.lineTo(size.width * 0.18, size.height * 0.48); // Central America
-    northAmerica.lineTo(size.width * 0.15, size.height * 0.42); // West Coast
-    northAmerica.lineTo(size.width * 0.10, size.height * 0.30);
-    northAmerica.lineTo(size.width * 0.12, size.height * 0.20);
-    northAmerica.close();
-    canvas.drawPath(northAmerica, continentPaint);
-    canvas.drawPath(northAmerica, continentBorder);
+  _MapPainter({required this.locations});
 
-    // South America
-    final southAmerica = Path();
-    southAmerica.moveTo(size.width * 0.22, size.height * 0.52);
-    southAmerica.lineTo(size.width * 0.26, size.height * 0.50);
-    southAmerica.lineTo(size.width * 0.28, size.height * 0.58);
-    southAmerica.lineTo(size.width * 0.27, size.height * 0.70);
-    southAmerica.lineTo(size.width * 0.24, size.height * 0.78);
-    southAmerica.lineTo(size.width * 0.22, size.height * 0.75);
-    southAmerica.lineTo(size.width * 0.20, size.height * 0.65);
-    southAmerica.close();
-    canvas.drawPath(southAmerica, continentPaint);
-    canvas.drawPath(southAmerica, continentBorder);
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Simple blue ocean background as fallback
+    final oceanPaint = Paint()
+      ..color = Colors.blue[200]!;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), oceanPaint);
 
-    // Europe
-    final europe = Path();
-    europe.moveTo(size.width * 0.48, size.height * 0.20);
-    europe.lineTo(size.width * 0.52, size.height * 0.18);
-    europe.lineTo(size.width * 0.55, size.height * 0.22);
-    europe.lineTo(size.width * 0.54, size.height * 0.28);
-    europe.lineTo(size.width * 0.50, size.height * 0.30);
-    europe.lineTo(size.width * 0.47, size.height * 0.26);
-    europe.close();
-    canvas.drawPath(europe, continentPaint);
-    canvas.drawPath(europe, continentBorder);
-
-    // Africa
-    final africa = Path();
-    africa.moveTo(size.width * 0.50, size.height * 0.32);
-    africa.lineTo(size.width * 0.54, size.height * 0.30);
-    africa.lineTo(size.width * 0.58, size.height * 0.35);
-    africa.lineTo(size.width * 0.58, size.height * 0.45);
-    africa.lineTo(size.width * 0.56, size.height * 0.58);
-    africa.lineTo(size.width * 0.52, size.height * 0.68);
-    africa.lineTo(size.width * 0.48, size.height * 0.65);
-    africa.lineTo(size.width * 0.47, size.height * 0.52);
-    africa.lineTo(size.width * 0.48, size.height * 0.40);
-    africa.close();
-    canvas.drawPath(africa, continentPaint);
-    canvas.drawPath(africa, continentBorder);
-
-    // Asia
-    final asia = Path();
-    asia.moveTo(size.width * 0.58, size.height * 0.18);
-    asia.lineTo(size.width * 0.75, size.height * 0.15);
-    asia.lineTo(size.width * 0.82, size.height * 0.20);
-    asia.lineTo(size.width * 0.85, size.height * 0.30);
-    asia.lineTo(size.width * 0.82, size.height * 0.40);
-    asia.lineTo(size.width * 0.75, size.height * 0.42);
-    asia.lineTo(size.width * 0.68, size.height * 0.38);
-    asia.lineTo(size.width * 0.62, size.height * 0.32);
-    asia.lineTo(size.width * 0.58, size.height * 0.25);
-    asia.close();
-    canvas.drawPath(asia, continentPaint);
-    canvas.drawPath(asia, continentBorder);
-
-    // Australia
-    final australia = Path();
-    australia.moveTo(size.width * 0.78, size.height * 0.58);
-    australia.lineTo(size.width * 0.85, size.height * 0.56);
-    australia.lineTo(size.width * 0.88, size.height * 0.62);
-    australia.lineTo(size.width * 0.86, size.height * 0.68);
-    australia.lineTo(size.width * 0.80, size.height * 0.68);
-    australia.lineTo(size.width * 0.76, size.height * 0.64);
-    australia.close();
-    canvas.drawPath(australia, continentPaint);
-    canvas.drawPath(australia, continentBorder);
-
-    // Antarctica (bottom)
-    final antarctica = Path();
-    antarctica.moveTo(size.width * 0.0, size.height * 0.88);
-    antarctica.lineTo(size.width * 1.0, size.height * 0.88);
-    antarctica.lineTo(size.width * 1.0, size.height * 0.95);
-    antarctica.lineTo(size.width * 0.0, size.height * 0.95);
-    antarctica.close();
-    canvas.drawPath(antarctica, continentPaint);
-    canvas.drawPath(antarctica, continentBorder);
+    // Draw loading text
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: 'Loading map...',
+        style: TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(size.width / 2 - textPainter.width / 2, size.height / 2),
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 

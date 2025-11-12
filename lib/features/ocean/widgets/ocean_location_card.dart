@@ -19,6 +19,10 @@ class OceanLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subtitleColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -68,9 +72,10 @@ class OceanLocationCard extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -78,7 +83,7 @@ class OceanLocationCard extends StatelessWidget {
                     '📍 ${latitude.toStringAsFixed(2)}°, ${longitude.toStringAsFixed(2)}°',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: subtitleColor,
                     ),
                   ),
                   if (measurements != null && measurements!.isNotEmpty) ...[

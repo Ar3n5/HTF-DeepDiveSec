@@ -27,6 +27,11 @@ class OceanStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.grey[300] : Colors.grey[600];
+    final valueColor = isDark ? Colors.white : Colors.grey[800];
+    final subtitleColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -37,8 +42,8 @@ class OceanStatsCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.1),
-              color.withOpacity(0.05),
+              color.withOpacity(isDark ? 0.15 : 0.1),
+              color.withOpacity(isDark ? 0.08 : 0.05),
             ],
           ),
         ),
@@ -51,7 +56,7 @@ class OceanStatsCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withOpacity(isDark ? 0.3 : 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 28),
@@ -65,14 +70,14 @@ class OceanStatsCard extends StatelessWidget {
                         title,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: titleColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 4),
                       RichText(
                         text: TextSpan(
-                          style: TextStyle(color: Colors.grey[800]),
+                          style: TextStyle(color: valueColor),
                           children: [
                             TextSpan(
                               text: value,
@@ -103,20 +108,20 @@ class OceanStatsCard extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey[600],
+                  color: subtitleColor,
                 ),
               ),
             ],
             if (min != null && max != null && avg != null) ...[
               const SizedBox(height: 16),
-              const Divider(),
+              Divider(color: isDark ? Colors.grey[700] : null),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem('Min', min!.toStringAsFixed(1), Colors.blue),
-                  _buildStatItem('Avg', avg!.toStringAsFixed(1), Colors.green),
-                  _buildStatItem('Max', max!.toStringAsFixed(1), Colors.orange),
+                  _buildStatItem('Min', min!.toStringAsFixed(1), Colors.blue, isDark),
+                  _buildStatItem('Avg', avg!.toStringAsFixed(1), Colors.green, isDark),
+                  _buildStatItem('Max', max!.toStringAsFixed(1), Colors.orange, isDark),
                 ],
               ),
             ],
@@ -126,14 +131,14 @@ class OceanStatsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
+  Widget _buildStatItem(String label, String value, Color color, bool isDark) {
     return Column(
       children: [
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: isDark ? Colors.grey[300] : Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
         ),

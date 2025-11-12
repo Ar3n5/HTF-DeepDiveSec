@@ -18,6 +18,10 @@ class OceanLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.grey[800];
+    final subtitleColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -36,7 +40,7 @@ class OceanLineChart extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: textColor,
                     ),
                   ),
                 ),
