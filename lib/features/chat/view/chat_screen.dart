@@ -61,11 +61,13 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     _textController.clear();
+    
+    // Save to history BEFORE sending (so it shows up immediately)
+    QueryHistory.addQuery(text).then((_) {
+      _loadQueryHistory();
+    });
+    
     _viewModel.send(text);
-
-    // Save to history
-    QueryHistory.addQuery(text);
-    _loadQueryHistory();
 
     // Scroll to bottom after new message
     _scrollToBottom();
@@ -245,11 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: _MessageView(
-                                  m,
-                                  _viewModel.host,
-                                  l10n,
-                                ),
+                                child: _MessageView(m, _viewModel.host, l10n),
                               ),
                               // Add favorite button for AI responses
                               if (!m.isUser &&
@@ -550,6 +548,31 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _jumpToFavorite(String query) {
+    // Find the message index that matches this query
+    final messageIndex = _viewModel.messages.indexWhere(
+      (m) => m.isUser && m.text == query,
+    );
+    
+    if (messageIndex != -1) {
+      // Calculate approximate scroll position
+      // Each message is roughly 100-150 pixels
+      final targetPosition = messageIndex * 120.0;
+      
+      _scrollController.jumpTo(
+        targetPosition.clamp(0.0, _scrollController.position.maxScrollExtent),
+      );
+      
+      // Show a snackbar to confirm
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Jumped to: "$query"'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _showFavoritesDialog() async {
     final favorites = await Favorites.getFavorites();
 
@@ -615,13 +638,27 @@ class _ChatScreenState extends State<ChatScreen> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 18),
-                            onPressed: () async {
-                              await Favorites.removeFavorite(fav.id);
-                              Navigator.pop(context);
-                              _showFavoritesDialog();
-                            },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_forward, size: 18),
+                                tooltip: 'Jump to conversation',
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _jumpToFavorite(fav.query);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                tooltip: 'Remove favorite',
+                                onPressed: () async {
+                                  await Favorites.removeFavorite(fav.id);
+                                  Navigator.pop(context);
+                                  _showFavoritesDialog();
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       );
