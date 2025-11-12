@@ -65,13 +65,16 @@ class ChatViewModel extends ChangeNotifier {
       onError: (err) {
         final errorMsg = err.error.toString();
         addLog(AgentLogType.error, 'Error: $errorMsg');
-        
+
         // Check if rate limited - show placeholder visualization
-        if (errorMsg.contains('overload') || 
+        if (errorMsg.contains('overload') ||
             errorMsg.contains('rate limit') ||
             errorMsg.contains('quota') ||
             errorMsg.contains('429')) {
-          addLog(AgentLogType.info, 'API rate limited - showing placeholder visualization');
+          addLog(
+            AgentLogType.info,
+            'API rate limited - showing placeholder visualization',
+          );
           _showPlaceholderVisualization();
         } else {
           _messages.add(
@@ -81,20 +84,23 @@ class ChatViewModel extends ChangeNotifier {
         notifyListeners();
       },
     );
-    
-    addLog(AgentLogType.info, 'Ocean Explorer initialized with ${_catalog.items.length} UI components');
+
+    addLog(
+      AgentLogType.info,
+      'Ocean Explorer initialized with ${_catalog.items.length} UI components',
+    );
   }
 
   Future<void> send(String text) async {
     if (text.trim().isEmpty) return;
-    
+
     _lastUserQuery = text;
     addLog(AgentLogType.perceive, 'User query: "$text"');
     _messages.add(ChatMessageModel(text: text, isUser: true));
     notifyListeners();
-    
+
     addLog(AgentLogType.plan, 'Planning response strategy...');
-    
+
     try {
       await _conversation.sendRequest(UserMessage([TextPart(text)]));
       addLog(AgentLogType.info, 'Request completed successfully');
@@ -106,12 +112,12 @@ class ChatViewModel extends ChangeNotifier {
 
   void abort() {
     addLog(AgentLogType.info, 'User requested abort - recreating conversation');
-    
+
     // Dispose the current conversation and create a new one
     // This will stop the LLM from processing
     try {
       _conversation.dispose();
-      
+
       // Recreate the conversation
       final generator = _service.createContentGenerator(catalog: _catalog);
       _conversation = GenUiConversation(
@@ -132,22 +138,28 @@ class ChatViewModel extends ChangeNotifier {
         onError: (err) {
           final errorMsg = err.error.toString();
           addLog(AgentLogType.error, 'Error: $errorMsg');
-          
+
           // Check if rate limited - show helpful message
-          if (errorMsg.contains('overload') || 
+          if (errorMsg.contains('overload') ||
               errorMsg.contains('rate limit') ||
               errorMsg.contains('quota') ||
               errorMsg.contains('429')) {
-            addLog(AgentLogType.info, 'API rate limited - suggesting dashboard');
-            _messages.add(ChatMessageModel(
-              text: '⚠️ API RATE LIMITED\n\n'
+            addLog(
+              AgentLogType.info,
+              'API rate limited - suggesting dashboard',
+            );
+            _messages.add(
+              ChatMessageModel(
+                text:
+                    '⚠️ API RATE LIMITED\n\n'
                     'The Gemini API is currently overloaded. Please:\n\n'
                     '1️⃣ Wait 60 seconds before trying again\n'
                     '2️⃣ Click the 📊 dashboard button (top right) to see all ocean visualizations with placeholder data\n\n'
                     'Your question was: "$_lastUserQuery"\n\n'
                     'The dashboard shows examples of all components: temperature gauges, wave charts, '
                     'interactive maps, and more!',
-            ));
+              ),
+            );
           } else {
             _messages.add(
               ChatMessageModel(text: 'Error: $errorMsg', isError: true),
@@ -156,10 +168,12 @@ class ChatViewModel extends ChangeNotifier {
           notifyListeners();
         },
       );
-      
-      _messages.add(ChatMessageModel(
-        text: '🛑 Request aborted. You can ask a new question now.',
-      ));
+
+      _messages.add(
+        ChatMessageModel(
+          text: '🛑 Request aborted. You can ask a new question now.',
+        ),
+      );
       notifyListeners();
     } catch (e) {
       addLog(AgentLogType.error, 'Failed to abort: $e');
@@ -173,22 +187,25 @@ class ChatViewModel extends ChangeNotifier {
   /// Show placeholder visualization when API is rate limited
   void _showPlaceholderVisualization() {
     // Add warning message first
-    _messages.add(ChatMessageModel(
-      text: '⚠️ API RATE LIMITED - Showing placeholder visualization below.\n'
+    _messages.add(
+      ChatMessageModel(
+        text:
+            '⚠️ API RATE LIMITED - Showing placeholder visualization below.\n'
             'Wait 60 seconds before trying again.',
-    ));
-    
+      ),
+    );
+
     // Create a unique surface ID
     final surfaceId = 'placeholder_${DateTime.now().millisecondsSinceEpoch}';
     final lowerQuery = _lastUserQuery.toLowerCase();
-    
+
     // Manually create a surface with placeholder data
     final host = _conversation.host;
     final surface = host.surfaces[surfaceId] ?? host.createSurface(surfaceId);
-    
+
     // Determine what visualization to show based on query
     List<Map<String, dynamic>> components = [];
-    
+
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
       if (lowerQuery.contains('gauge') || lowerQuery.contains('meter')) {
         components = [
@@ -202,10 +219,11 @@ class ChatViewModel extends ChangeNotifier {
               'min': 0.0,
               'max': 30.0,
               'color': 'orange',
-            }
-          }
+            },
+          },
         ];
-      } else if (lowerQuery.contains('trend') || lowerQuery.contains('over time')) {
+      } else if (lowerQuery.contains('trend') ||
+          lowerQuery.contains('over time')) {
         components = [
           {
             'id': 'placeholder_chart',
@@ -221,8 +239,8 @@ class ChatViewModel extends ChangeNotifier {
               ],
               'unit': '°C',
               'color': 'orange',
-            }
-          }
+            },
+          },
         ];
       } else {
         components = [
@@ -238,8 +256,8 @@ class ChatViewModel extends ChangeNotifier {
               'min': '12.3°C',
               'max': '24.1°C',
               'average': '18.5°C',
-            }
-          }
+            },
+          },
         ];
       }
     } else if (lowerQuery.contains('wave') || lowerQuery.contains('height')) {
@@ -256,11 +274,12 @@ class ChatViewModel extends ChangeNotifier {
             'min': '1.5m',
             'max': '4.8m',
             'average': '3.2m',
-          }
-        }
+          },
+        },
       ];
-    } else if (lowerQuery.contains('location') || lowerQuery.contains('where') || 
-               lowerQuery.contains('map')) {
+    } else if (lowerQuery.contains('location') ||
+        lowerQuery.contains('where') ||
+        lowerQuery.contains('map')) {
       components = [
         {
           'id': 'placeholder_map',
@@ -268,12 +287,27 @@ class ChatViewModel extends ChangeNotifier {
           'data': {
             'title': 'Ocean Locations (PLACEHOLDER)',
             'locations': [
-              {'name': 'North Atlantic', 'latitude': 45.0, 'longitude': -30.0, 'value': '18.5°C'},
-              {'name': 'Pacific Ocean', 'latitude': 10.0, 'longitude': -150.0, 'value': '22.1°C'},
-              {'name': 'Indian Ocean', 'latitude': -15.0, 'longitude': 75.0, 'value': '26.3°C'},
-            ]
-          }
-        }
+              {
+                'name': 'North Atlantic',
+                'latitude': 45.0,
+                'longitude': -30.0,
+                'value': '18.5°C',
+              },
+              {
+                'name': 'Pacific Ocean',
+                'latitude': 10.0,
+                'longitude': -150.0,
+                'value': '22.1°C',
+              },
+              {
+                'name': 'Indian Ocean',
+                'latitude': -15.0,
+                'longitude': 75.0,
+                'value': '26.3°C',
+              },
+            ],
+          },
+        },
       ];
     } else {
       // Default: show a stats card
@@ -287,11 +321,11 @@ class ChatViewModel extends ChangeNotifier {
             'icon': 'water_drop',
             'color': 'blue',
             'subtitle': 'Placeholder data - API rate limited',
-          }
-        }
+          },
+        },
       ];
     }
-    
+
     // Update the surface with components
     try {
       surface.update(components);
