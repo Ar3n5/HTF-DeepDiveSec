@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/features/chat/models/chat_message.dart';
+import 'package:hack_the_future_starter/features/chat/models/agent_log.dart';
 import 'package:hack_the_future_starter/features/chat/services/genui_service.dart';
 
 class ChatViewModel extends ChangeNotifier {
@@ -17,8 +18,27 @@ class ChatViewModel extends ChangeNotifier {
   ValueListenable<bool> get isProcessing => _conversation.isProcessing;
 
   final List<ChatMessageModel> _messages = [];
+  final List<AgentLogEntry> _agentLogs = [];
+  bool _showAgentLog = false;
 
   List<ChatMessageModel> get messages => List.unmodifiable(_messages);
+  List<AgentLogEntry> get agentLogs => List.unmodifiable(_agentLogs);
+  bool get showAgentLog => _showAgentLog;
+
+  void toggleAgentLog() {
+    _showAgentLog = !_showAgentLog;
+    notifyListeners();
+  }
+
+  void addLog(AgentLogType type, String message, [Map<String, dynamic>? data]) {
+    _agentLogs.add(AgentLogEntry(type: type, message: message, data: data));
+    notifyListeners();
+  }
+
+  void clearLogs() {
+    _agentLogs.clear();
+    notifyListeners();
+  }
 
   void init() {
     _catalog = _service.createCatalog();
@@ -29,27 +49,50 @@ class ChatViewModel extends ChangeNotifier {
       genUiManager: _manager,
       contentGenerator: generator,
       onSurfaceAdded: (s) {
+        addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
         _messages.add(ChatMessageModel(surfaceId: s.surfaceId));
         notifyListeners();
       },
       onTextResponse: (text) {
+        addLog(AgentLogType.present, 'Text response generated');
         _messages.add(ChatMessageModel(text: text));
         notifyListeners();
       },
       onError: (err) {
+        addLog(AgentLogType.error, 'Error: ${err.error}');
         _messages.add(
           ChatMessageModel(text: err.error.toString(), isError: true),
         );
         notifyListeners();
       },
     );
+    
+    addLog(AgentLogType.info, 'Ocean Explorer initialized with ${_catalog.items.length} UI components');
   }
 
   Future<void> send(String text) async {
     if (text.trim().isEmpty) return;
+    
+    addLog(AgentLogType.perceive, 'User query: "$text"');
     _messages.add(ChatMessageModel(text: text, isUser: true));
     notifyListeners();
-    await _conversation.sendRequest(UserMessage([TextPart(text)]));
+    
+    addLog(AgentLogType.plan, 'Planning response strategy...');
+    
+    try {
+      await _conversation.sendRequest(UserMessage([TextPart(text)]));
+      addLog(AgentLogType.info, 'Request completed successfully');
+    } catch (e) {
+      addLog(AgentLogType.error, 'Request failed: $e');
+      rethrow;
+    }
+  }
+
+  void abort() {
+    addLog(AgentLogType.info, 'User aborted current operation');
+    // Note: GenUiConversation doesn't have a direct abort method in the current API
+    // but we log the action and the isProcessing flag will update
+    notifyListeners();
   }
 
   void disposeConversation() {

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1076762516853",
-    "project_id": "agentic-ocean-explorer",
-    "storage_bucket": "agentic-ocean-explorer.firebasestorage.app"
+    "project_number": "979720132753",
+    "project_id": "deepdivesec-htf",
+    "storage_bucket": "deepdivesec-htf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1076762516853:android:f844a7bcc5c989982dc73c",
+        "mobilesdk_app_id": "1:979720132753:android:a6b6adb2fcf4f61906c730",
         "android_client_info": {
           "package_name": "com.example.hack_the_future_starter"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDQ44WLOfCwVksmDIQkrK4lgQIlvMypJCI"
+          "current_key": "AIzaSyADVQ8buGtNCQaXgO57MXXRvzPfa-l3mb4"
         }
       ],
       "services": {

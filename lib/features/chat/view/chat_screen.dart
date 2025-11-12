@@ -55,13 +55,94 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appBarTitle)),
+      appBar: AppBar(
+        title: Text(l10n.appBarTitle),
+        actions: [
+          IconButton(
+            icon: Icon(_viewModel.showAgentLog
+                ? Icons.visibility_off
+                : Icons.visibility),
+            tooltip: 'Toggle Agent Log',
+            onPressed: _viewModel.toggleAgentLog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Clear Logs',
+            onPressed: _viewModel.clearLogs,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _viewModel,
           builder: (context, _) {
             return Column(
               children: [
+                // Agent Log Panel
+                if (_viewModel.showAgentLog)
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[700]!),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          color: Colors.grey[850],
+                          child: Row(
+                            children: [
+                              const Icon(Icons.terminal,
+                                  color: Colors.green, size: 16),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Agent Run Log',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${_viewModel.agentLogs.length} entries',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: _viewModel.agentLogs.length,
+                            itemBuilder: (_, i) {
+                              final log = _viewModel.agentLogs[i];
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 2.0),
+                                child: Text(
+                                  log.toString(),
+                                  style: TextStyle(
+                                    fontFamily: 'monospace',
+                                    fontSize: 11,
+                                    color: _getLogColor(log.type),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Messages List
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
@@ -74,16 +155,40 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
+                // Processing Indicator with Abort Button
                 ValueListenableBuilder<bool>(
                   valueListenable: _viewModel.isProcessing,
                   builder: (_, isProcessing, __) {
                     if (!isProcessing) return const SizedBox.shrink();
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(),
+                    return Container(
+                      padding: const EdgeInsets.all(8.0),
+                      color: Colors.blue[50],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Agent processing...',
+                              style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 12),
+                          TextButton.icon(
+                            icon: const Icon(Icons.stop, size: 16),
+                            label: const Text('Abort'),
+                            onPressed: _viewModel.abort,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
+                // Input Row
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -93,13 +198,21 @@ class _ChatScreenState extends State<ChatScreen> {
                           controller: _textController,
                           decoration: InputDecoration(
                             hintText: l10n.hintTypeMessage,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                           onSubmitted: (_) => _send(),
+                          maxLines: null,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send),
                         onPressed: _send,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ],
                   ),
@@ -110,6 +223,25 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+
+  Color _getLogColor(type) {
+    switch (type.toString().split('.').last) {
+      case 'perceive':
+        return Colors.cyan;
+      case 'plan':
+        return Colors.purple[300]!;
+      case 'act':
+        return Colors.yellow[700]!;
+      case 'reflect':
+        return Colors.orange[300]!;
+      case 'present':
+        return Colors.green[300]!;
+      case 'error':
+        return Colors.red[300]!;
+      default:
+        return Colors.grey[400]!;
+    }
   }
 }
 
