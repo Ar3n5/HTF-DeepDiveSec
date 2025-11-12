@@ -183,8 +183,8 @@ class ChatViewModel extends ChangeNotifier {
     final lowerQuery = _lastUserQuery.toLowerCase();
     
     // Manually create a surface with placeholder data
-    final surface = _manager.host.surfaces[surfaceId] ?? 
-                    _manager.host.createSurface(surfaceId);
+    final host = _conversation.host;
+    final surface = host.surfaces[surfaceId] ?? host.createSurface(surfaceId);
     
     // Determine what visualization to show based on query
     List<Map<String, dynamic>> components = [];
