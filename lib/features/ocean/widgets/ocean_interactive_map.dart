@@ -91,16 +91,12 @@ class _OceanInteractiveMapState extends State<OceanInteractiveMap> {
                     initialZoom: 2.0,
                     minZoom: 1.0,
                     maxZoom: 8.0,
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractFlags.all,
-                    ),
                   ),
                   children: [
                     // Map tiles layer
                     TileLayer(
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.hackthefuture.oceanexplorer',
-                      tileBuilder: isDark ? _darkModeTileBuilder : null,
                     ),
                     // Markers layer
                     MarkerLayer(
@@ -134,17 +130,6 @@ class _OceanInteractiveMapState extends State<OceanInteractiveMap> {
     );
   }
 
-  Widget? _darkModeTileBuilder(BuildContext context, Widget tileWidget, TileImage tile) {
-    return ColorFiltered(
-      colorFilter: const ColorFilter.matrix([
-        -0.2126, -0.7152, -0.0722, 0, 255, // Red channel
-        -0.2126, -0.7152, -0.0722, 0, 255, // Green channel
-        -0.2126, -0.7152, -0.0722, 0, 255, // Blue channel
-        0, 0, 0, 1, 0, // Alpha channel
-      ]),
-      child: tileWidget,
-    );
-  }
 
   Widget _buildLocationInfo(Map<String, dynamic> location) {
     final name = location['name'] ?? 'Unknown';
