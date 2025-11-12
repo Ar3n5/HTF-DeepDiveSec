@@ -62,10 +62,25 @@ class ChatViewModel extends ChangeNotifier {
         Future.delayed(const Duration(milliseconds: 100), notifyListeners);
       },
       onError: (err) {
-        addLog(AgentLogType.error, 'Error: ${err.error}');
-        _messages.add(
-          ChatMessageModel(text: err.error.toString(), isError: true),
-        );
+        final errorMsg = err.error.toString();
+        addLog(AgentLogType.error, 'Error: $errorMsg');
+        
+        // Check if rate limited - show placeholder notice
+        if (errorMsg.contains('overload') || 
+            errorMsg.contains('rate limit') ||
+            errorMsg.contains('quota') ||
+            errorMsg.contains('429')) {
+          addLog(AgentLogType.info, 'API rate limited - notifying user to use placeholder data');
+          _messages.add(ChatMessageModel(
+            text: '⚠️ RATE LIMITED: API is overloaded. Please wait 60 seconds before trying again. '
+                  'For now, you can view the component showcase (📊 dashboard button) which shows '
+                  'all visualizations with placeholder data.',
+          ));
+        } else {
+          _messages.add(
+            ChatMessageModel(text: 'Error: $errorMsg', isError: true),
+          );
+        }
         notifyListeners();
       },
     );

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_genui/flutter_genui.dart';
 import 'package:hack_the_future_starter/l10n/app_localizations.dart';
+import 'package:hack_the_future_starter/core/theme_provider.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
 
 import '../models/chat_message.dart';
 import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final ThemeProvider? themeProvider;
+  
+  const ChatScreen({super.key, this.themeProvider});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -81,6 +84,15 @@ class _ChatScreenState extends State<ChatScreen> {
               );
             },
           ),
+          // Dark/Light mode toggle
+          if (widget.themeProvider != null)
+            IconButton(
+              icon: Icon(widget.themeProvider!.isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode),
+              tooltip: 'Toggle Theme',
+              onPressed: widget.themeProvider!.toggleTheme,
+            ),
           IconButton(
             icon: Icon(_viewModel.showAgentLog
                 ? Icons.visibility_off
