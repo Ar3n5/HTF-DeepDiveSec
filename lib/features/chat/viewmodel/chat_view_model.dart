@@ -59,6 +59,7 @@ class ChatViewModel extends ChangeNotifier {
       onSurfaceAdded: (s) {
         if (_ignoreNextResponse) {
           addLog(AgentLogType.info, 'Ignoring surface due to abort');
+          _ignoreNextResponse = false; // Reset flag
           return;
         }
         addLog(AgentLogType.present, 'Created UI surface: ${s.surfaceId}');
@@ -70,7 +71,7 @@ class ChatViewModel extends ChangeNotifier {
       onTextResponse: (text) {
         if (_ignoreNextResponse) {
           addLog(AgentLogType.info, 'Ignoring text response due to abort');
-          _ignoreNextResponse = false; // Reset flag after ignoring
+          _ignoreNextResponse = false; // Reset flag
           return;
         }
         addLog(AgentLogType.present, 'Text response generated');
@@ -79,6 +80,13 @@ class ChatViewModel extends ChangeNotifier {
         Future.delayed(const Duration(milliseconds: 100), notifyListeners);
       },
       onError: (err) {
+        // Check if aborted - ignore all errors
+        if (_ignoreNextResponse) {
+          addLog(AgentLogType.info, 'Ignoring error due to abort');
+          _ignoreNextResponse = false; // Reset flag
+          return;
+        }
+        
         final errorMsg = err.error.toString();
         addLog(AgentLogType.error, 'Error: $errorMsg');
 
@@ -128,15 +136,18 @@ class ChatViewModel extends ChangeNotifier {
 
   void abort() {
     addLog(AgentLogType.info, 'User requested abort');
-    
+
     // Set flag to ignore any pending responses
     _ignoreNextResponse = true;
-    
+
     // Add message to chat
-    _messages.add(ChatMessageModel(
-      text: '🛑 Request aborted. Any pending results will be ignored.\n'
+    _messages.add(
+      ChatMessageModel(
+        text:
+            '🛑 Request aborted. Any pending results will be ignored.\n'
             'You can ask a new question now.',
-    ));
+      ),
+    );
     notifyListeners();
   }
 
