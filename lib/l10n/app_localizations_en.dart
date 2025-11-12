@@ -9,10 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Agentic Ocean Explorer';
+  String get appTitle => 'Nautilus AI';
 
   @override
-  String get appBarTitle => 'Agentic Ocean Explorer';
+  String get appBarTitle => 'Nautilus AI';
 
   @override
   String get hintTypeMessage => 'Type your message…';

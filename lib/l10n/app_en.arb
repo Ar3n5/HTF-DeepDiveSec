@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
-  "appTitle": "Agentic Ocean Explorer",
-  "appBarTitle": "Agentic Ocean Explorer",
+  "appTitle": "Nautilus AI",
+  "appBarTitle": "Nautilus AI",
   "hintTypeMessage": "Type your message…",
   "labelAI": "AI",
   "labelError": "Error",

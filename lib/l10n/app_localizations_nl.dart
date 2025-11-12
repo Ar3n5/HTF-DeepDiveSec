@@ -9,10 +9,10 @@ class AppLocalizationsNl extends AppLocalizations {
   AppLocalizationsNl([String locale = 'nl']) : super(locale);
 
   @override
-  String get appTitle => 'Agentic Ocean Explorer';
+  String get appTitle => 'Nautilus AI';
 
   @override
-  String get appBarTitle => 'Agentic Ocean Explorer';
+  String get appBarTitle => 'Nautilus AI';
 
   @override
   String get hintTypeMessage => 'Typ je bericht…';

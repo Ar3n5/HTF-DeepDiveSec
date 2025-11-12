@@ -101,13 +101,13 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agentic Ocean Explorer'**
+  /// **'Nautilus AI'**
   String get appTitle;
 
   /// No description provided for @appBarTitle.
   ///
   /// In en, this message translates to:
-  /// **'Agentic Ocean Explorer'**
+  /// **'Nautilus AI'**
   String get appBarTitle;
 
   /// No description provided for @hintTypeMessage.

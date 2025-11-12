@@ -233,5 +233,5 @@ To complete 100% of stretch goals:
 **Commits:** 40+
 **Features:** 30+
 
-🌊 **Agentic Ocean Explorer - Ready for Hack The Future 2025!** 🌊
+🌊 **Nautilus AI - Ready for Hack The Future 2025!** 🌊
 

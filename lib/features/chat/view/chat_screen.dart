@@ -540,7 +540,7 @@ class _ChatScreenState extends State<ChatScreen> {
           break;
         }
       }
-      
+
       await Favorites.addFavorite(
         query: query,
         response: message.text ?? 'Visualization',
@@ -559,23 +559,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _jumpToFavorite(int? savedIndex, String query) {
     // Try to use saved index first, otherwise search for it
-    int messageIndex = savedIndex ?? _viewModel.messages.indexWhere(
-      (m) => m.isUser && m.text == query,
-    );
-    
+    int messageIndex =
+        savedIndex ??
+        _viewModel.messages.indexWhere((m) => m.isUser && m.text == query);
+
     if (messageIndex != -1 && messageIndex < _viewModel.messages.length) {
       // Calculate scroll position based on item height
       // Average message height is about 100-200px, but we'll be conservative
       const double estimatedItemHeight = 150.0;
       final targetPosition = messageIndex * estimatedItemHeight;
-      
+
       // Ensure we don't scroll past the end
       if (_scrollController.hasClients) {
         final maxScroll = _scrollController.position.maxScrollExtent;
         final scrollTo = targetPosition.clamp(0.0, maxScroll);
-        
+
         _scrollController.jumpTo(scrollTo);
-        
+
         // Show confirmation
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
