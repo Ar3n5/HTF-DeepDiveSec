@@ -6,7 +6,7 @@ import 'package:hack_the_future_starter/features/chat/models/agent_log.dart';
 import 'package:hack_the_future_starter/features/chat/services/genui_service.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_stats_card.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_chart_widget.dart';
-import 'package:hack_the_future_starter/features/ocean/widgets/ocean_gauge_widget.dart';
+import 'package:hack_the_future_starter/features/ocean/widgets/ocean_gauge_widget.dart' show OceanGaugeWidget;
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_interactive_map.dart';
 
 class ChatViewModel extends ChangeNotifier {
@@ -207,7 +207,7 @@ class ChatViewModel extends ChangeNotifier {
 
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
       if (lowerQuery.contains('gauge') || lowerQuery.contains('meter')) {
-        placeholderWidget = OceanGauge(
+        placeholderWidget = OceanGaugeWidget(
           title: 'Ocean Temperature (PLACEHOLDER)',
           value: 18.5,
           min: 0,
