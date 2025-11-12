@@ -192,16 +192,19 @@ class ChatViewModel extends ChangeNotifier {
   /// Show placeholder visualization when API is rate limited
   void _showPlaceholderVisualization() {
     final lowerQuery = _lastUserQuery.toLowerCase();
-    
+
     // Add warning message
-    _messages.add(ChatMessageModel(
-      text: '⚠️ API RATE LIMITED - Showing placeholder data below.\n'
+    _messages.add(
+      ChatMessageModel(
+        text:
+            '⚠️ API RATE LIMITED - Showing placeholder data below.\n'
             'Wait 60 seconds before trying again.',
-    ));
-    
+      ),
+    );
+
     // Determine and show appropriate placeholder widget
     Widget placeholderWidget;
-    
+
     if (lowerQuery.contains('temperature') || lowerQuery.contains('temp')) {
       if (lowerQuery.contains('gauge') || lowerQuery.contains('meter')) {
         placeholderWidget = const OceanGauge(
@@ -232,9 +235,8 @@ class ChatViewModel extends ChangeNotifier {
           icon: Icons.thermostat,
           color: Colors.orange,
           subtitle: 'Placeholder - API rate limited',
-          min: '12.3°C',
-          max: '24.1°C',
-          average: '18.5°C',
+          min: 12.3,
+          max: 24.1,
         );
       }
     } else if (lowerQuery.contains('wave') || lowerQuery.contains('height')) {
@@ -244,18 +246,34 @@ class ChatViewModel extends ChangeNotifier {
         icon: Icons.waves,
         color: Colors.blue,
         subtitle: 'Placeholder - API rate limited',
-        min: '1.5m',
-        max: '4.8m',
-        average: '3.2m',
+        min: 1.5,
+        max: 4.8,
       );
-    } else if (lowerQuery.contains('location') || lowerQuery.contains('where') || 
-               lowerQuery.contains('map') || lowerQuery.contains('sea')) {
+    } else if (lowerQuery.contains('location') ||
+        lowerQuery.contains('where') ||
+        lowerQuery.contains('map') ||
+        lowerQuery.contains('sea')) {
       placeholderWidget = const OceanInteractiveMap(
         title: 'Ocean Locations (PLACEHOLDER)',
         locations: [
-          {'name': 'Red Sea', 'latitude': 22.0, 'longitude': 38.0, 'value': '28°C'},
-          {'name': 'Mediterranean', 'latitude': 35.0, 'longitude': 18.0, 'value': '24°C'},
-          {'name': 'Arabian Sea', 'latitude': 15.0, 'longitude': 65.0, 'value': '26°C'},
+          {
+            'name': 'Red Sea',
+            'latitude': 22.0,
+            'longitude': 38.0,
+            'value': '28°C',
+          },
+          {
+            'name': 'Mediterranean',
+            'latitude': 35.0,
+            'longitude': 18.0,
+            'value': '24°C',
+          },
+          {
+            'name': 'Arabian Sea',
+            'latitude': 15.0,
+            'longitude': 65.0,
+            'value': '26°C',
+          },
         ],
       );
     } else {
@@ -267,7 +285,7 @@ class ChatViewModel extends ChangeNotifier {
         subtitle: 'Placeholder - API rate limited',
       );
     }
-    
+
     _messages.add(ChatMessageModel(placeholderWidget: placeholderWidget));
     notifyListeners();
   }
