@@ -6,9 +6,14 @@ import 'package:hack_the_future_starter/core/theme_provider.dart';
 import 'package:hack_the_future_starter/features/ocean/widgets/ocean_components_demo.dart';
 import 'package:hack_the_future_starter/features/chat/widgets/ocean_background.dart';
 import 'package:hack_the_future_starter/core/page_transitions.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/chat_message.dart';
 import '../models/query_history.dart';
+import '../models/favorites.dart';
 import '../viewmodel/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -23,8 +28,10 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
+  final _screenshotController = ScreenshotController();
   late final ChatViewModel _viewModel;
   List<String> _queryHistory = [];
+  final Set<int> _favoritedIndices = {};
 
   @override
   void initState() {
@@ -107,11 +114,16 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.history),
-              tooltip: 'Query History',
-              onPressed: _showHistoryDialog,
-            ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Query History',
+            onPressed: _showHistoryDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            tooltip: 'Favorites',
+            onPressed: _showFavoritesDialog,
+          ),
             IconButton(
               icon: const Icon(Icons.dashboard),
               tooltip: 'View Components',
@@ -232,15 +244,58 @@ class _ChatScreenState extends State<ChatScreen> {
                       itemCount: _viewModel.messages.length,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemBuilder: (_, i) {
-                        final m = _viewModel.messages[i];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 4.0,
-                          ),
-                          child: _MessageView(m, _viewModel.host, l10n),
-                        );
-                      },
+                         final m = _viewModel.messages[i];
+                         return Padding(
+                           padding: const EdgeInsets.symmetric(
+                             horizontal: 8.0,
+                             vertical: 4.0,
+                           ),
+                           child: Row(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               Expanded(
+                                 child: _MessageView(
+                                   m,
+                                   _viewModel.host,
+                                   l10n,
+                                   screenshotController: _screenshotController,
+                                 ),
+                               ),
+                               // Add favorite and share buttons for AI responses
+                               if (!m.isUser && m.text != null && !m.isError) ...[
+                                 const SizedBox(width: 8),
+                                 Column(
+                                   children: [
+                                     IconButton(
+                                       icon: Icon(
+                                         _favoritedIndices.contains(i)
+                                             ? Icons.favorite
+                                             : Icons.favorite_border,
+                                         color: _favoritedIndices.contains(i)
+                                             ? Colors.red
+                                             : Colors.grey,
+                                         size: 20,
+                                       ),
+                                       tooltip: 'Favorite',
+                                       onPressed: () => _toggleFavorite(i, m),
+                                     ),
+                                   ],
+                                 ),
+                               ],
+                               // Share button for surfaces and placeholder widgets
+                               if (m.surfaceId != null || m.placeholderWidget != null) ...[
+                                 const SizedBox(width: 8),
+                                 IconButton(
+                                   icon: const Icon(Icons.share, size: 20),
+                                   color: Colors.blue,
+                                   tooltip: 'Share',
+                                   onPressed: () => _shareMessage(i, m),
+                                 ),
+                               ],
+                             ],
+                           ),
+                         );
+                       },
                     ),
                   ),
                   // Processing Indicator with Abort Button
@@ -489,14 +544,173 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  void _toggleFavorite(int index, ChatMessageModel message) async {
+    setState(() {
+      if (_favoritedIndices.contains(index)) {
+        _favoritedIndices.remove(index);
+      } else {
+        _favoritedIndices.add(index);
+      }
+    });
+
+    // Save to favorites storage
+    if (_favoritedIndices.contains(index)) {
+      final query = index > 0 ? _viewModel.messages[index - 1].text ?? '' : '';
+      await Favorites.addFavorite(
+        query: query,
+        response: message.text ?? 'Visualization',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Added to favorites ⭐'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareMessage(int index, ChatMessageModel message) async {
+    try {
+      final imageBytes = await _screenshotController.capture();
+      if (imageBytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to capture screenshot')),
+          );
+        }
+        return;
+      }
+
+      // Save to temp file
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/ocean_visualization.png');
+      await file.writeAsBytes(imageBytes);
+
+      // Share the file
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Ocean Explorer Visualization: ${message.text ?? "Check this out!"}',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Share failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _showFavoritesDialog() async {
+    final favorites = await Favorites.getFavorites();
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.favorite, color: Colors.red),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Favorites',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (favorites.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'No favorites yet.\nStar a message to save it!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: favorites.length,
+                    itemBuilder: (context, index) {
+                      final fav = favorites[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: const Icon(Icons.favorite, color: Colors.red, size: 20),
+                          title: Text(
+                            fav.query,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            fav.response,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            onPressed: () async {
+                              await Favorites.removeFavorite(fav.id);
+                              Navigator.pop(context);
+                              _showFavoritesDialog();
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              if (favorites.isNotEmpty) ...[
+                const Divider(),
+                TextButton.icon(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  label: const Text(
+                    'Clear All Favorites',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onPressed: () async {
+                    await Favorites.clearFavorites();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _MessageView extends StatelessWidget {
-  const _MessageView(this.model, this.host, this.l10n);
+  const _MessageView(
+    this.model,
+    this.host,
+    this.l10n, {
+    this.screenshotController,
+  });
 
   final ChatMessageModel model;
   final GenUiHost host;
   final AppLocalizations l10n;
+  final ScreenshotController? screenshotController;
 
   @override
   Widget build(BuildContext context) {
@@ -515,7 +729,12 @@ class _MessageView extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 800),
-                  child: model.placeholderWidget,
+                  child: screenshotController != null
+                      ? Screenshot(
+                          controller: screenshotController!,
+                          child: model.placeholderWidget!,
+                        )
+                      : model.placeholderWidget,
                 ),
               ),
             ),
@@ -645,7 +864,12 @@ class _MessageView extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 800),
-                child: GenUiSurface(host: host, surfaceId: surfaceId),
+                child: screenshotController != null
+                    ? Screenshot(
+                        controller: screenshotController!,
+                        child: GenUiSurface(host: host, surfaceId: surfaceId),
+                      )
+                    : GenUiSurface(host: host, surfaceId: surfaceId),
               ),
             ),
           ),
