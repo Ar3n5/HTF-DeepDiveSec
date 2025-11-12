@@ -114,16 +114,16 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
           actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: 'Query History',
-            onPressed: _showHistoryDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            tooltip: 'Favorites',
-            onPressed: _showFavoritesDialog,
-          ),
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: 'Query History',
+              onPressed: _showHistoryDialog,
+            ),
+            IconButton(
+              icon: const Icon(Icons.favorite),
+              tooltip: 'Favorites',
+              onPressed: _showFavoritesDialog,
+            ),
             IconButton(
               icon: const Icon(Icons.dashboard),
               tooltip: 'View Components',
@@ -244,58 +244,61 @@ class _ChatScreenState extends State<ChatScreen> {
                       itemCount: _viewModel.messages.length,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemBuilder: (_, i) {
-                         final m = _viewModel.messages[i];
-                         return Padding(
-                           padding: const EdgeInsets.symmetric(
-                             horizontal: 8.0,
-                             vertical: 4.0,
-                           ),
-                           child: Row(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                               Expanded(
-                                 child: _MessageView(
-                                   m,
-                                   _viewModel.host,
-                                   l10n,
-                                   screenshotController: _screenshotController,
-                                 ),
-                               ),
-                               // Add favorite and share buttons for AI responses
-                               if (!m.isUser && m.text != null && !m.isError) ...[
-                                 const SizedBox(width: 8),
-                                 Column(
-                                   children: [
-                                     IconButton(
-                                       icon: Icon(
-                                         _favoritedIndices.contains(i)
-                                             ? Icons.favorite
-                                             : Icons.favorite_border,
-                                         color: _favoritedIndices.contains(i)
-                                             ? Colors.red
-                                             : Colors.grey,
-                                         size: 20,
-                                       ),
-                                       tooltip: 'Favorite',
-                                       onPressed: () => _toggleFavorite(i, m),
-                                     ),
-                                   ],
-                                 ),
-                               ],
-                               // Share button for surfaces and placeholder widgets
-                               if (m.surfaceId != null || m.placeholderWidget != null) ...[
-                                 const SizedBox(width: 8),
-                                 IconButton(
-                                   icon: const Icon(Icons.share, size: 20),
-                                   color: Colors.blue,
-                                   tooltip: 'Share',
-                                   onPressed: () => _shareMessage(i, m),
-                                 ),
-                               ],
-                             ],
-                           ),
-                         );
-                       },
+                        final m = _viewModel.messages[i];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _MessageView(
+                                  m,
+                                  _viewModel.host,
+                                  l10n,
+                                  screenshotController: _screenshotController,
+                                ),
+                              ),
+                              // Add favorite and share buttons for AI responses
+                              if (!m.isUser &&
+                                  m.text != null &&
+                                  !m.isError) ...[
+                                const SizedBox(width: 8),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        _favoritedIndices.contains(i)
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: _favoritedIndices.contains(i)
+                                            ? Colors.red
+                                            : Colors.grey,
+                                        size: 20,
+                                      ),
+                                      tooltip: 'Favorite',
+                                      onPressed: () => _toggleFavorite(i, m),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              // Share button for surfaces and placeholder widgets
+                              if (m.surfaceId != null ||
+                                  m.placeholderWidget != null) ...[
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.share, size: 20),
+                                  color: Colors.blue,
+                                  tooltip: 'Share',
+                                  onPressed: () => _shareMessage(i, m),
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                   // Processing Indicator with Abort Button
@@ -592,22 +595,23 @@ class _ChatScreenState extends State<ChatScreen> {
       // Share the file
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Ocean Explorer Visualization: ${message.text ?? "Check this out!"}',
+        text:
+            'Ocean Explorer Visualization: ${message.text ?? "Check this out!"}',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Share failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Share failed: $e')));
       }
     }
   }
 
   void _showFavoritesDialog() async {
     final favorites = await Favorites.getFavorites();
-    
+
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -654,7 +658,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.favorite, color: Colors.red, size: 20),
+                          leading: const Icon(
+                            Icons.favorite,
+                            color: Colors.red,
+                            size: 20,
+                          ),
                           title: Text(
                             fav.query,
                             style: const TextStyle(fontWeight: FontWeight.bold),
