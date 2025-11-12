@@ -11,6 +11,7 @@ class ApiKeys {
   static const String geminiApiKey = 'YOUR_GEMINI_API_KEY_HERE';
   
   // Set to true to use direct Gemini API instead of Firebase Vertex AI
-  static const bool useDirectGeminiApi = true;
+  // For now, using Firebase Vertex AI (already configured)
+  static const bool useDirectGeminiApi = false;
 }
 
