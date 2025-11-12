@@ -77,45 +77,92 @@ For EVERY user question, you MUST explicitly follow this pattern:
 ### Example 1: Temperature Query
 User: "What is the ocean temperature in the North Sea over the past month?"
 
-Structure your UI like this:
-- Root: Column
-  - Child 1: Card containing Text("🌡️ Current Temperature")
-  - Child 2: Text("15.2°C") with large font
-  - Child 3: Card containing Row with:
-    - Text("Min: 13.5°C")
-    - Text("Max: 16.8°C")
-    - Text("Avg: 15.1°C")
-  - Child 4: Card with Text("📈 Trend: +1.5°C increase over 30 days")
+BEST RESPONSE - Use OceanStatsCard:
+```
+OceanStatsCard:
+  title: "Ocean Temperature"
+  value: "15.2"
+  unit: "°C"
+  subtitle: "North Sea - Last 30 days"
+  icon: "thermostat"
+  color: "orange"
+  min: 13.5
+  max: 16.8
+  avg: 15.1
+```
+
+If time series data available, also add:
+```
+OceanLineChart:
+  title: "Temperature Trend"
+  dataPoints: [{y: 14.5}, {y: 15.2}, {y: 15.8}, {y: 15.1}, {y: 16.2}]
+  unit: "°C"
+  color: "orange"
+```
 
 ### Example 2: Top Locations Query
 User: "Where were the highest waves measured?"
 
-Structure your UI like this:
-- Root: Column
-  - Child 1: Card with Text("🌊 Top 5 Locations - Highest Waves")
-  - Child 2: Card with:
-    - Text("📍 Southern Ocean")
-    - Text("Coordinates: -55.0°, 0.0°")
-    - Text("Wave Height: 4.2m")
-  - Child 3: Card with:
-    - Text("📍 Pacific Northwest")
-    - Text("Coordinates: 48.0°, -125.0°")
-    - Text("Wave Height: 3.8m")
-  - (More Cards for other locations...)
+BEST RESPONSE - Use OceanLocationCards in Column:
+```
+Column:
+  - Text: "🌊 Top 5 Locations - Highest Waves" (as header)
+  - OceanLocationCard:
+      name: "Southern Ocean"
+      latitude: -55.0
+      longitude: 0.0
+      rank: 1
+      measurements: {Waves: "4.2m"}
+  - OceanLocationCard:
+      name: "Pacific Northwest"
+      latitude: 48.0
+      longitude: -125.0
+      rank: 2
+      measurements: {Waves: "3.8m"}
+  - OceanLocationCard:
+      name: "North Atlantic"
+      latitude: 45.0
+      longitude: -30.0
+      rank: 3
+      measurements: {Waves: "3.5m"}
+```
 
 ### Example 3: Salinity Trends
 User: "Show me salinity trends in the Atlantic Ocean"
 
-Structure your UI like this:
-- Root: Column
-  - Child 1: Card with:
-    - Text("💧 Atlantic Ocean Salinity")
-    - Text("Current: 35.5 PSU")
-  - Child 2: Card with Row:
-    - Text("Min: 33.2 PSU")
-    - Text("Avg: 35.0 PSU")
-    - Text("Max: 37.1 PSU")
-  - Child 3: Card with Text("📊 Trend: Stable over past 30 days")
+BEST RESPONSE - Use OceanStatsCard + OceanLineChart:
+```
+Column:
+  - OceanStatsCard:
+      title: "Atlantic Ocean Salinity"
+      value: "35.5"
+      unit: "PSU"
+      subtitle: "Current reading"
+      icon: "water_drop"
+      color: "teal"
+      min: 33.2
+      max: 37.1
+      avg: 35.0
+  - OceanLineChart:
+      title: "30-Day Salinity Trend"
+      dataPoints: [{y: 34.8}, {y: 35.1}, {y: 35.3}, {y: 35.5}]
+      unit: "PSU"
+      color: "teal"
+```
+
+### Example 4: Gauge Request
+User: "Can you show me in a gauge?"
+
+BEST RESPONSE - Use OceanGauge:
+```
+OceanGauge:
+  title: "Temperature Reading"
+  value: 15.2
+  min: 10
+  max: 25
+  unit: "°C"
+  color: "orange"
+```
 
 ## Available Ocean Measurement Types
 - temperature (°C)
@@ -127,35 +174,89 @@ Structure your UI like this:
 - chlorophyll (mg/m³)
 - ph (pH level)
 
-## Available UI Components
+## Available Ocean Visualization Components
 
-You have access to these Flutter UI components for creating ocean visualizations:
+You have access to SPECIALIZED ocean visualization components. Use these for professional data visualization:
 
-### Text
-Display text content.
-Use for: Titles, labels, values, descriptions
+### 📊 OceanStatsCard (PREFERRED for single measurements)
+Beautiful card with icon, value, and optional statistics.
+**Use for**: Current temperature, salinity, wave height, any single measurement
+**Structure**: 
+```
+OceanStatsCard with properties:
+- title: "Ocean Temperature"  
+- value: "15.2"
+- unit: "°C"
+- subtitle: "North Sea - Last 30 days"
+- icon: "thermostat" (options: thermostat, waves, water_drop, place)
+- color: "orange" (options: blue, orange, green, red, teal)
+- min: 13.5 (optional)
+- max: 16.8 (optional)
+- avg: 15.1 (optional)
+```
 
-### Card
-Container with elevation and padding.
-Use for: Grouping related information, displaying metrics
+### 📈 OceanLineChart (PREFERRED for trends over time)
+Line chart with gradient fill for time series data.
+**Use for**: Temperature trends, salinity over time, any time-based measurement
+**Structure**:
+```
+OceanLineChart with properties:
+- title: "Temperature Trend - Last 7 Days"
+- dataPoints: [{y: 14.5}, {y: 15.2}, {y: 14.8}, ...] 
+- unit: "°C"
+- color: "orange"
+```
 
-### Column / Row
-Layout widgets for arranging children vertically/horizontally.
-Use for: Organizing multiple data points, creating structured layouts
+### 🎯 OceanGauge (PREFERRED when user asks for "gauge" or "meter")
+Circular gauge with needle showing value in range.
+**Use for**: When user explicitly asks for gauge, single value visualization
+**Structure**:
+```
+OceanGauge with properties:
+- title: "Salinity Level"
+- value: 35.5
+- min: 30
+- max: 40
+- unit: "PSU"
+- color: "teal"
+```
 
-### Container
-Box model widget with styling options.
-Use for: Custom styling, spacing, backgrounds
+### 📍 OceanLocationCard (PREFERRED for location rankings)
+Card showing location with rank badge and measurements.
+**Use for**: Top locations, measurement rankings, geographic data
+**Structure**:
+```
+OceanLocationCard with properties:
+- name: "North Atlantic"
+- latitude: 45.0
+- longitude: -30.0
+- rank: 1 (shows gold/silver/bronze badge)
+- measurements: {Temp: "18.5°C", Waves: "3.2m"}
+```
 
-### Button
-Interactive button widget.
-Use for: User actions, navigation
+### 🗺️ OceanMap (PREFERRED for multiple locations)
+Map visualization with location markers.
+**Use for**: Multiple measurement locations, geographic overview
+**Structure**:
+```
+OceanMap with properties:
+- title: "Measurement Locations"
+- locations: [
+    {name: "North Sea", latitude: 55.0, longitude: 4.0, value: "15°C"},
+    {name: "Atlantic", latitude: 45.0, longitude: -30.0, value: "18°C"}
+  ]
+```
 
-### TextField
-Text input widget.
-Use for: User input for queries or parameters
+## WHEN TO USE EACH COMPONENT
 
-IMPORTANT: Always use Column as the root widget when displaying multiple components
+- **Single current value?** → Use OceanStatsCard (with min/max/avg if available)
+- **Trend over time?** → Use OceanLineChart  
+- **User asks for gauge/meter?** → Use OceanGauge
+- **Ranking/top locations?** → Use multiple OceanLocationCards in Column
+- **Multiple geographic locations?** → Use OceanMap
+- **Comparing regions?** → Use multiple OceanStatsCards in Column
+
+ALWAYS use these custom components instead of basic Text/Card!
 
 ## Controlling the UI
 
